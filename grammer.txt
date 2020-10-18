@@ -1,0 +1,38 @@
+Types: integer, real, bool, array-> rectangular, jagged
+Variable Name: alphabet, digits, underscore. Not start with digit
+Keywords : program, declare, list, of , variables, array, size, values, jagged, of, integer, real, boolean
+Symbols : ( , ) , { , } , : , ; , [ , ]
+
+----------------------------------------------------------------
+S => PROGRAM RBOP RBCL CBOP LIST_OF_STATEMENTS CBCL
+------------------------------------------------------------------
+LIST_OF_STATEMENTS => DECLARATION_STATEMENTS  ASSIGNMENT_STATEMENTS
+
+------------------------------------------------------------------------
+DECLARATION_STATEMENTS => DECLARATION_STATEMENTS DECLARATION | DECLARATION
+
+DECLARATION => PRIMITIVE RECT_ARRAY JAGGED_ARRAY
+
+PRIMITIVE => SINGLE_VAR_PRIM | MULTI_VAR_PRIM
+
+SINGLE_VAR_PRIM => DECLARE VAR_NAME COLON TYPE SEMICOLON
+
+MULTI_VAR_PRIM => DECLARE LIST OF VARIABLES VAR_NAME_LIST COLON TYPE SEMICOLON
+
+VAR_NAME_LIST => VAR_NAME_LIST VAR_NAME| VAR_NAME
+
+VAR_NAME => ID
+
+TYPE => integer | real | bool 
+
+ID1 => LETTER ID2
+ID2 => LETDIG ID2| LETDIG
+
+LETDIG => DIGIT|LETTER| epsilon
+LETTER => a|b|c ...............................Z | _
+DIGIT -> 0|1|2...............|9
+
+
+
+ASSIGNMENT_STATEMENTS => ASSIGNMENT_STATEMENTS ASSIGNMENT | ASSIGNMENT
+ASSIGNMENT => LEFT_VAR EQUALS 
