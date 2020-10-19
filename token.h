@@ -12,7 +12,7 @@ typedef enum TokenName
     ARRAY,
     SIZE,
     VALUES,
-    JAGARR,
+    JAGGED,
     INTEGER,
     REAL,
     BOOLEAN,
@@ -31,8 +31,11 @@ typedef enum TokenName
     AND,
     OR,
     TWODOT,
+    R,
+    EQUALS,
     ID,
-    NUM
+    NUM,
+    ERR
 } TokenName;
 
 typedef union Value

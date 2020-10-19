@@ -3,6 +3,44 @@
 #include <string.h>
 #include "token.h"
 
+//check if the token is an integer
+int isNum(char *token)
+{
+    char *ptr = token;
+    for (; *ptr != '\0'; ptr++)
+    {
+        char ch = *ptr;
+        if (!(ch >= '0' && ch <= '9'))
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+//check if the token id an ID
+int isID(char *token)
+{
+    char *ptr = token;
+    char ch = *ptr;
+    if (!(ch == '_' || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')))
+    {
+        return 0;
+    }
+    ptr++;
+    for (; *ptr != '\0'; ptr++)
+    {
+        ch = *ptr;
+        if (!(ch == '_' || (ch >= 'a' && ch <= 'z') ||
+              (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')))
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// Takes input as a token and returns the appropriate TokenName
 TokenName findCorrectToken(char *token)
 {
     if (strcmp(token, "program") == 0)
@@ -52,6 +90,10 @@ TokenName findCorrectToken(char *token)
     else if (strcmp(token, "array") == 0)
     {
         return ARRAY;
+    }
+    else if (strcmp(token, "jagged") == 0)
+    {
+        return JAGGED;
     }
     else if (strcmp(token, "size") == 0)
     {
@@ -109,8 +151,24 @@ TokenName findCorrectToken(char *token)
     {
         return TWODOT;
     }
-    else
+    else if (strcmp(token, "R1") == 0)
+    {
+        return R;
+    }
+    else if (strcmp(token, "=") == 0)
+    {
+        return EQUALS;
+    }
+    else if (isNum(token))
+    {
+        return NUM;
+    }
+    else if (isID(token))
     {
         return ID;
+    }
+    else
+    {
+        return ERR;
     }
 }
