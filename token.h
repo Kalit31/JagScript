@@ -1,30 +1,54 @@
 #ifndef LEX_DEF_
 #define LEX_DEF_
 
-typedef enum TokenName{
+typedef enum TokenName
+{
     // Add tokens here
-    TQ_SQOP,
-    TQ_SQCL
+    PROGRAM,
+    DECLARE,
+    LIST,
+    OF,
+    VARIABLES,
+    ARRAY,
+    SIZE,
+    VALUES,
+    JAGARR,
+    INTEGER,
+    REAL,
+    BOOLEAN,
+    RBOP,
+    RBCL,
+    CBOP,
+    CBCL,
+    SQOP,
+    SQCL,
+    COLON,
+    SEMICOLON,
+    PLUS,
+    MINUS,
+    MULT,
+    DIV,
+    AND,
+    OR,
+    TWODOT,
+    ID,
+    NUM
 } TokenName;
 
-typedef union Value {
+typedef union Value
+{
     int INT_VALUE;
     float FLOAT_VALUE;
 } Value;
 
-typedef struct Token {
-    TokenName TOKEN_NAME;
-    char* LEXEME;
-    int LINE_NO;
+struct token
+{
+    TokenName tokenName;
+    char *lexeme;
+    int lineNo;
 
-    // Stores 0 if integer 1 if an boolean
-    // 2 to denote an unknown symbol
-    int IS_NUMBER;
+    struct token *next;
+};
 
-    Value* VALUE; // Stores NULL if the Token is not a number
-    struct Token* next;
-} Token;
-
-typedef Token* tokenStream; //tokenStream is a linkedlist of tokens
-
+typedef struct token Token;
 #endif

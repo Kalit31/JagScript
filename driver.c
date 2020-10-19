@@ -11,7 +11,8 @@ int main()
     char *fileName = "grammar.txt";
     readGrammar(fileName, arr);
     Node *curr;
-    for(int i=0; i<2; i++){
+    for (int i = 0; i < 2; i++)
+    {
         curr = &arr[i];
         while (curr != NULL)
         {
@@ -22,7 +23,15 @@ int main()
     }
     printf("------------READING GRAMMER COMPLETED-------------\n");
 
-    tokenStream ts;
-    tokeniseSourcecode("sourcecode.txt", &ts);
+    Token *ts = NULL;
+    ts = tokeniseSourcecode("sourcecodetest.txt", ts);
+    Token *tokCurr = ts;
+    while (tokCurr != NULL)
+    {
+        printf("%s-%d\n", tokCurr->lexeme, tokCurr->tokenName);
+        tokCurr = tokCurr->next;
+    }
+    printf("-------------TOKENISING SOURCE CODE COMPLETED-------------\n");
+
     return 0;
 }
