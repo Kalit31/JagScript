@@ -28,7 +28,8 @@ void readGrammar(char *fileName, Node *llist)
         // Extract the leftmost non-terminal of the rule
         token = strtok(eachLine, delim);
 
-        llist[line].element = token;
+        llist[line].element = (char *) malloc(sizeof(char)*(strlen(token)+1));
+        strcpy(llist[line].element, token);
         llist[line].nxt = NULL;
 
         Node *curr = &llist[line];
@@ -40,7 +41,8 @@ void readGrammar(char *fileName, Node *llist)
             if (strcmp(ARROW, token) != 0)
             {
                 Node *next = (Node *)malloc(sizeof(Node));
-                next->element = token;
+                next->element = (char *) malloc(sizeof(char)*(strlen(token)+1));
+                strcpy(next->element, token);
                 next->nxt = NULL;
                 curr->nxt = next;
                 curr = next;
@@ -49,12 +51,6 @@ void readGrammar(char *fileName, Node *llist)
         }
 
         curr = &llist[line];
-        while (curr != NULL)
-        {
-            printf("%s ", curr->element);
-            curr = curr->nxt;
-        }
-        printf("\n");
         line++;
     }
 
