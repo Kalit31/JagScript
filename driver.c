@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "ReadGrammar.c"
+#include "tokenizer.c"
 #define NUM_RULES 50
 
 int main()
@@ -20,5 +21,8 @@ int main()
         printf("\n");
     }
     printf("------------READING GRAMMER COMPLETED-------------\n");
+
+    tokenStream ts;
+    tokeniseSourcecode("sourcecode.txt", &ts);
     return 0;
 }
