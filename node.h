@@ -3,8 +3,8 @@
 
 struct node
 {
-    char *block;
-    struct node *next;
+    char *element;
+    struct node *nxt;
 };
 
 typedef struct node Node;
