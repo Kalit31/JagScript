@@ -123,4 +123,10 @@ struct treenode
 
 // typedef struct parseTree ParseTree;
 
+TreeNode *initialiseParseTree();
+TreeNode *createLeafNode(Terminal terminal);
+TreeNode *createNonLeafNode(NonTerminal nonterminal);
+TreeNode *createNode(int isLeafNode, int enumid, TreeNode *parent);
+void addRuleToParseTree(TreeNode *n);
+
 #endif

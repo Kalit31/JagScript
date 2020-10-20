@@ -35,7 +35,7 @@ void readGrammar(char *fileName, Node *llist)
         Node *curr = &llist[line];
 
         token = strtok(NULL, delim);
-
+        int ruleSize = 0;
         while (token != NULL)
         {
             if (strcmp(ARROW, token) != 0)
@@ -43,14 +43,17 @@ void readGrammar(char *fileName, Node *llist)
                 Node *next = (Node *)malloc(sizeof(Node));
                 next->element = (char *)malloc(sizeof(char) * (strlen(token) + 1));
                 strcpy(next->element, token);
+                next->ruleSize = 0;
                 next->nxt = NULL;
                 curr->nxt = next;
                 curr = next;
+                ruleSize++;
             }
             token = strtok(NULL, delim);
         }
 
         curr = &llist[line];
+        curr->ruleSize = ruleSize;
         line++;
     }
 

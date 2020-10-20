@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parsetree.h"
+#include "naryTree.c"
 #include "stack.c"
 
 int findTerminal(char *s)
@@ -12,6 +13,7 @@ int findTerminal(char *s)
             return i;
         }
     }
+    return -1;
 }
 
 int findNonTerminal(char *s)
@@ -23,56 +25,59 @@ int findNonTerminal(char *s)
             return i;
         }
     }
+    return -1;
 }
 
-TreeNode *createTreeNode()
+int build(TreeNode *curr, Stack *st, Token *s, Node *g, int currTokenIndex)
 {
+    StackNode *t = top(st);
+    if (t->val->isLeaf)
+    {
+    }
+    else
+    {
+        int ruleNo = t->val->nodeType.nonLeafNode.nonterminal;
+        printf("RULE NO: %d\n", ruleNo);
+        printf("%d RULE SIZE: %d\n", t->val->nodeType.nonLeafNode.nonterminal, g[ruleNo].ruleSize);
+        int rhsSize = g[ruleNo].ruleSize;
+        Node *list[rhsSize];
+
+        int ptrInd = rhsSize - 1;
+        Node *curr = g[ruleNo].nxt;
+        for (; ptrInd >= 0; ptrInd--)
+        {
+            list[ptrInd] = curr;
+            curr = curr->nxt;
+        }
+        pop(st);
+        for (int i = 0; i < rhsSize; i++)
+        {
+            TreeNode *n;
+            if (list[i]->element[0] >= 65 && list[i]->element[0] <= 90)
+            {
+                n = createNonLeafNode(findNonTerminal(list[i]->element));
+            }
+            else
+            {
+                n = createLeafNode(findTerminal(list[i]->element));
+            }
+            push(st, n);
+        }
+    }
+    return 0;
 }
+
+// Think of an algorithm for parsing. Currently, the idea is to implement
+//  a recursive one with backtrackong, but it is not working :(
 
 TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
 {
+    int error = 0;
     Stack *st = createStack();
-    int ruleNo = 0;
-    Node *curr = &g[0];
 
-    NonLeafNode nonLeafNode;
-    nonLeafNode.ruleNo = ruleNo;
-    nonLeafNode.child = NULL;
-    nonLeafNode.nonterminal = findNonTerminal(curr->element);
+    TreeNode *root = initialiseParseTree();
+    push(st, root);
 
-    NodeType nodeType;
-    nodeType.nonLeafNode = nonLeafNode;
-
-    TreeNode *newNode = (TreeNode *)malloc(sizeof(TreeNode));
-    newNode->isLeaf = 0;
-    newNode->parent = NULL;
-    newNode->next = NULL;
-    newNode->nodeType = nodeType;
-
-    printf("%d\n", newNode->nodeType.nonLeafNode.nonterminal);
-
-    push(st, newNode);
-    pop(st);
-    pop(st);
-    return NULL;
+    build(root, st, s, g, 0);
+    return root;
 }
-
-/*
- Node *curr;
-    for (int i = 0; i < 2; i++)
-    {
-        curr = &g[i];
-        while (curr != NULL)
-        {
-            printf("%s ", curr->element);
-            curr = curr->nxt;
-        }
-        printf("\n");
-    }
-    Token *tokCurr = s;
-    while (tokCurr != NULL)
-    {
-        printf("%s-%d\n", tokCurr->lexeme, tokCurr->tokenName);
-        tokCurr = tokCurr->next;
-    }
-*/

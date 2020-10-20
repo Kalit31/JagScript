@@ -4,6 +4,7 @@
 struct node
 {
     char *element;
+    int ruleSize; // only applicable for the lhs of a rule
     struct node *nxt;
 };
 
