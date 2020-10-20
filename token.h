@@ -1,7 +1,7 @@
 #ifndef LEX_DEF_
 #define LEX_DEF_
 
-#define NUM_TOKENS
+#define NUM_TOKENS 32
 
 static char *TOKENS[NUM_TOKENS] = {
     "PROGRAM",

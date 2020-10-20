@@ -20,7 +20,7 @@ StackNode *createStackNode(TreeNode *tn)
 
 void push(Stack *st, TreeNode *tn)
 {
-    StackNode *newNode = createStack(tn);
+    StackNode *newNode = createStackNode(tn);
     newNode->nxt = st->head;
     st->head = newNode;
     st->size = st->size + 1;

@@ -1,113 +1,127 @@
 Types: integer, real, bool, array-> rectangular, jagged
 Variable Name: alphabet, digits, underscore. Not start with digit
-Keywords: program: PROGRAM, declare: DECLARE, list: LIST, of: OF , variables: VARIABLES, array: ARRAY, size: SIZE, values: VALUES, jagged: JAGARR, of: OF, integer: INTEGER, real: REAL, boolean: BOOLEAN
-Symbols: ( : RBOP , ) : RBCL , { : CBOP , }: CBCL , : : COLON , ; : SEMICOLON, [ : SQOP , ] : SQCL
+Keywords: program: PROGRAM, declare: DECLARE, list: LIST, of: OF , variables: VARIABLES, array: ARRAY, size: SIZE, values: VALUES, jagged array: JAGARR, of: OF, integer: INTEGER, real: REAL, boolean: BOOLEAN
+Symbols: ( : RBOP , ) : RBCL , { : CBOP , }: CBCL , : : COLON , ; : SEMICOLON, [ : SBOP , ] : SBCL
 Arithmetic operators: +: PLUS, -: MINUS, *: MULT, /: DIV 
 Boolean operators: &&&: AND, |||: OR
 No relational operators
 
-
 //Start of program
-S => PROGRAM RBOP RBCL CBOP LIST_OF_STATEMENTS CBCL
+s => PROGRAM RBOP RBCL CBOP list_of_statements CBCL
 
 //Program is a list of declaration and assignment statements
-LIST_OF_STATEMENTS => DECLARATION_STATEMENTS  ASSIGNMENT_STATEMENTS
+list_of_statements => declaration_statements  assignment_statements
+
+DECLARATION STATEMENTS
 
 // Declaration statements is a list of declarations
-DECLARATION_STATEMENTS => DECLARATION_STATEMENTS DECLARATION | DECLARATION
+declaration_statements => declaration declaration_statements 
+declaration_statements => declaration
 
 // Declarations can be of two type -> declaring single variable or declaring multiple variables
-DECLARATION => SINGLE_DECL | MULTI_DECL 
+declaration => primitive_decl  
+declaration => jagged_array_decl
 
-// For Single Variable declaration
-SINGLE_DECL => DECLARE VAR_NAME COLON TYPE SEMICOLON
+// Declaration statement for primitive variables
+primitive_decl => DECLARE declare_vars COLON declaration_type SEMICOLON
 
-// For Multiple Variables declaration
-MULTI_DECL => DECLARE LIST OF VARIABLES VAR_NAME_LIST COLON DECLARATION_TYPE SEMICOLON
+// Declaration statement for jagged array variables
+jagged_array_decl => DECLARE declare_vars COLON declare_jagged
 
-// This language has three data types
-DECLARATION_TYPE => PRIMITIVE | DECLARE_TWOD_JAGGED | DECLARE_THREED_JAGGED
-
-// Primitive are further categorized into 3 types
-PRIMITIVE => INTEGER | REAL | BOOLEAN
-
-// Rectangular array
-DECLARE_RECT_ARRAY => ARRAY ARRAY_DIM OF INTEGER 
-
-// Array dimensions are [num .. num][num .. num]....[num .. num]
-ARRAY_DIM => ARRAY_DIM SBOP IDX TWODOT IDX  SBCL | SBOP IDX TWODOT IDX  SBCL
-
-ARRAY => RECT_ARRAY | JAGGED_ARRAY
-
-// Jagged array
-JAGGED_ARRAY => TWOD_JAGGED | THREED_JAGGED
-
-// 2D  [num .. num][ ]
-DECLARE_TWOD_JAGGED => JAGARR SBOP IDX TWODOT IDX SBCL SBOP SBCL TWOD_JAGGED_STATEMENTS
-// 3D  [num .. num][ ][ ]
-DECLARE_THREED_JAGGED => JAGARR SBOP IDX TWODOT IDX SBCL SBOP SBCL SBOP SBCL THREED_JAGGED_STATEMENTS
-
-TWOD_JAGGED_STATEMENTS=>TWOD_JAGGED_STATEMENTS TWOD_JAGGED_STATEMENT | TWOD_JAGGED_STATEMENT
-
-TWOD_JAGGED_STATEMENT=>R SBOP INTEGER SBCL  COLON SIZE INTEGER COLON VALUES CBOP TWOD_VALUES CBCL
-
-TWOD_VALUES=>TWOD_VALUES SEMICOLON LIST | LIST
-
-THREED_JAGGED_STATEMENTS=>THREED_JAGGED_STATEMENTS THREED_JAGGED_STATEMENT | THREED_JAGGED_STATEMENT
-
-THREED_JAGGED_STATEMENT=>R SBOP INTEGER SBCL  COLON SIZE INTEGER COLON VALUES CBOP
-THREED_VALUES CBCL
-
-THREED_VALUES => THREED_VALUES SEMICOLON LIST | LIST
+// Declare single variable or a list of variables
+declare_vars => ID  
+declare_vars => LIST OF VARIABLES var_name_list
 
 // variable name list
-VAR_NAME_LIST => VAR_NAME_LIST VAR_NAME| VAR_NAME
+var_name_list => ID var_name_list 
+var_name_list => ID
 
-VAR_NAME => ID1
+declaration_type => primitive  
+declaration_type => rect_array
+
+// Primitive are further categorized into 3 types
+primitive => INTEGER 
+primitive => REAL
+primitive => BOOLEAN
+
+// Rectangular array
+rect_array => ARRAY array_dim OF INTEGER
+
+// Array dimensions are [num .. num][num .. num]....[num .. num]
+array_dim => SBOP idx TWODOT idx SBCL array_dim
+array_dim => SBOP idx TWODOT idx  SBCL
+
+// Jagged array - 2D or 3D
+declare_jagged => declare_twod_jagged 
+declare_jagged => declare_threed_jagged
+
+// 2D  [num .. num][ ]
+declare_twod_jagged => JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL OF INTEGER SEMICOLON twod_jagged_statements
+
+twod_jagged_statements => twod_jagged_statement twod_jagged_statements
+twod_jagged_statements => twod_jagged_statement
+
+twod_jagged_statement => R SBOP INTEGER SBCL  COLON SIZE INTEGER COLON VALUES CBOP twod_values CBCL
+
+twod_values =>  NUM SEMICOLON  twod_values | 
+twod_values => NUM
+
+// 3D  [num .. num][ ][ ]
+declare_threed_jagged => JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL SBOP SBCL OF INTEGER SEMICOLON threed_jagged_statements
+
+threed_jagged_statements => threed_jagged_statement threed_jagged_statements 
+threed_jagged_statements => threed_jagged_statement
+
+threed_jagged_statement=>R SBOP INTEGER SBCL  COLON SIZE INTEGER COLON VALUES CBOP threed_values CBCL
+
+threed_values =>  list_num SEMICOLON threed_values
+threed_values => list_num
+
+list_num => NUM list_num
+list_num => NUM
 
 // Index of array
-IDX => ID1 | NUM  
-
-// ID1 is a string which does not start with a digit
-ID1 => LETTER ID2
-
-// ID2 is a string which can be a combination of letters and digits
-ID2 => LETDIG ID2| LETDIG
-
-LETDIG => DIGIT | LETTER | EPSILON
-LETTER => a|b|c ...............................Z | _
-DIGIT -> 0|1|2...............|9
+idx => ID 
+idx => NUM
 
 
-// Assignment statements are list of assignments
-ASSIGNMENT_STATEMENTS => ASSIGNMENT_STATEMENTS ASSIGNMENT | ASSIGNMENT
+
+ASSIGNMENT STATEMENTS
+
+// Assignment statements are list of assignments 
+assignment_statements => assignment assignment_statements
+assignment_statements => assignment
 
 // An assignment -> lhs = rhs
-ASSIGNMENT => LHS EQUALS RHS SEMICOLON
+assignment => lhs EQUALS rhs SEMICOLON
 
 // LHS is basically a variable or an array element
-LHS => ID1 | ARRAY_ELE
+lhs => ID
+lhs => array_ele
+
+// Array element - arr[2]
+array_ele => ID SBOP list SBCL
+list => idx list
+list => idx
 
 // Right hand expression can be an arithmetic expression or a boolean expression
-RHS => ARITHMETIC_EXPR | BOOLEAN_EXPR | ARRAY_EXPR
+rhs => arithmetic_expr
+rhs => boolean_expr
 
-LIST => LIST NUMBER | NUMBER
+// grammar for arithmetic expressions
+arithmetic_expr => arithmetic_term op1 arithmetic_expr
+arithmetic_expr => arithmetic_term
+arithmetic_term => IDX op2 arithmetic_term
+arithmetic_term => IDX
+op1 => PLUS 
+op1 => MINUS
+op2 => MULT
+op2 => DIV
 
-ARRAY_ELE=> ARRAY SBOP LIST SBCL
-
-// TODOs:
-
-ARITHMETIC_EXPR=> //copy the usual arithmetic grammar. Note that arithmetic expressions can be 
-   //made of ARRAY_ELE as well
-
-BOOLEAN_EXPR=> //copy usual boolean grammar.
-
-ARRAY_EXPR => //copy arithmetic grammar, with modifications...maybe replacing ID1 with ARRAY_ELE
-
-//grammar for accessing array element [should be same for both jagged and rectangular array]  
-
-
-
-
-
-
+// grammar for boolean expressions
+boolean_expr => boolean_term OR boolean_expr
+boolean_expr => boolean_term
+boolean_term => boolean_factor AND boolean_term
+boolean_term => boolean_factor
+boolean_factor => BOOLEAN
+boolean_factor => ID

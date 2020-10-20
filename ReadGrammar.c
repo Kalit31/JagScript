@@ -17,7 +17,7 @@ void readGrammar(char *fileName, Node *llist)
     }
 
     int line = 0;
-    char eachLine[100];
+    char eachLine[1000];
 
     // Read the file line by line
     while (fscanf(fp, " %[^\n]", eachLine) != EOF)
@@ -28,7 +28,7 @@ void readGrammar(char *fileName, Node *llist)
         // Extract the leftmost non-terminal of the rule
         token = strtok(eachLine, delim);
 
-        llist[line].element = (char *) malloc(sizeof(char)*(strlen(token)+1));
+        llist[line].element = (char *)malloc(sizeof(char) * (strlen(token) + 1));
         strcpy(llist[line].element, token);
         llist[line].nxt = NULL;
 
@@ -41,7 +41,7 @@ void readGrammar(char *fileName, Node *llist)
             if (strcmp(ARROW, token) != 0)
             {
                 Node *next = (Node *)malloc(sizeof(Node));
-                next->element = (char *) malloc(sizeof(char)*(strlen(token)+1));
+                next->element = (char *)malloc(sizeof(char) * (strlen(token) + 1));
                 strcpy(next->element, token);
                 next->nxt = NULL;
                 curr->nxt = next;

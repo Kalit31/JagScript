@@ -1,2 +1,62 @@
-<S> => PROGRAM RBOP RBCL CBOP <LIST_OF_STATEMENTS> CBCL
-<LIST_OF_STATEMENTS> => <DECLARATION_STATEMENTS>  <ASSIGNMENT_STATEMENTS>
+s PROGRAM RBOP RBCL CBOP list_of_statements CBCL
+list_of_statements declaration_statements assignment_statements
+declaration_statements declaration declaration_statements 
+declaration_statements declaration
+declaration primitive_decl  
+declaration jagged_array_decl
+primitive_decl DECLARE declare_vars COLON declaration_type SEMICOLON
+jagged_array_decl DECLARE declare_vars COLON declare_jagged
+declare_vars ID  
+declare_vars LIST OF VARIABLES var_name_list
+var_name_list ID var_name_list 
+var_name_list ID
+declaration_type primitive  
+declaration_type rect_array
+primitive INTEGER 
+primitive REAL
+primitive BOOLEAN
+rect_array ARRAY array_dim OF INTEGER
+array_dim SBOP idx TWODOT idx SBCL array_dim
+array_dim SBOP idx TWODOT idx  SBCL
+declare_jagged declare_twod_jagged 
+declare_jagged declare_threed_jagged
+declare_twod_jagged JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL OF INTEGER SEMICOLON twod_jagged_statements
+twod_jagged_statements twod_jagged_statement twod_jagged_statements
+twod_jagged_statements twod_jagged_statement
+twod_jagged_statement R SBOP INTEGER SBCL  COLON SIZE INTEGER COLON VALUES CBOP twod_values CBCL
+twod_values NUM SEMICOLON twod_values 
+twod_values NUM
+declare_threed_jagged JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL SBOP SBCL OF INTEGER SEMICOLON threed_jagged_statements
+threed_jagged_statements threed_jagged_statement threed_jagged_statements 
+threed_jagged_statements threed_jagged_statement
+threed_jagged_statement R SBOP INTEGER SBCL COLON SIZE INTEGER COLON VALUES CBOP threed_values CBCL
+threed_values list_num SEMICOLON threed_values
+threed_values list_num
+list_num NUM list_num
+list_num NUM
+idx ID 
+idx NUM
+assignment_statements assignment assignment_statements
+assignment_statements assignment
+assignment lhs EQUALS rhs SEMICOLON
+lhs ID
+lhs array_ele
+array_ele ID SBOP list SBCL
+list idx list
+list idx
+rhs arithmetic_expr
+rhs boolean_expr
+arithmetic_expr arithmetic_term op1 arithmetic_expr
+arithmetic_expr arithmetic_term
+arithmetic_term IDX op2 arithmetic_term
+arithmetic_term IDX
+op1 PLUS 
+op1 MINUS
+op2 MULT
+op2 DIV
+boolean_expr boolean_term OR boolean_expr
+boolean_expr boolean_term
+boolean_term boolean_factor AND boolean_term
+boolean_term boolean_factor
+boolean_factor BOOLEAN
+boolean_factor ID

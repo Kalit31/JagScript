@@ -82,6 +82,8 @@ typedef enum NonTerminal
     boolean_factor
 } NonTerminal;
 
+typedef struct treenode TreeNode;
+
 struct nonleafnode
 {
     NonTerminal nonterminal;
@@ -113,8 +115,6 @@ struct treenode
     struct treenode *parent;
     struct treenode *next; //next node in the same level
 };
-
-typedef struct treenode TreeNode;
 
 // struct parseTree
 // {

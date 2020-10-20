@@ -3,7 +3,7 @@
 #include "ReadGrammar.c"
 #include "tokenizer.c"
 #include "parsetree.c"
-#define NUM_RULES 50
+#define NUM_RULES 65
 
 int main()
 {
