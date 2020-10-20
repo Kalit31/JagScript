@@ -1,6 +1,42 @@
 #ifndef LEX_DEF_
 #define LEX_DEF_
 
+#define NUM_TOKENS
+
+static char *TOKENS[NUM_TOKENS] = {
+    "PROGRAM",
+    "DECLARE",
+    "LIST",
+    "OF",
+    "VARIABLES",
+    "ARRAY",
+    "SIZE",
+    "VALUES",
+    "JAGGED",
+    "INTEGER",
+    "REAL",
+    "BOOLEAN",
+    "RBOP",
+    "RBCL",
+    "CBOP",
+    "CBCL",
+    "SBOP",
+    "SBCL",
+    "COLON",
+    "SEMICOLON",
+    "PLUS",
+    "MINUS",
+    "MULT",
+    "DIV",
+    "AND",
+    "OR",
+    "TWODOT",
+    "R",
+    "EQUALS",
+    "ID",
+    "NUM",
+    "ERR"};
+
 typedef enum TokenName
 {
     // Add tokens here
@@ -20,8 +56,8 @@ typedef enum TokenName
     RBCL,
     CBOP,
     CBCL,
-    SQOP,
-    SQCL,
+    SBOP,
+    SBCL,
     COLON,
     SEMICOLON,
     PLUS,

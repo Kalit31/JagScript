@@ -65,11 +65,11 @@ TokenName findCorrectToken(char *token)
     }
     else if (strcmp(token, "[") == 0)
     {
-        return SQOP;
+        return SBOP;
     }
     else if (strcmp(token, "]") == 0)
     {
-        return SQCL;
+        return SBCL;
     }
     else if (strcmp(token, "declare") == 0)
     {
