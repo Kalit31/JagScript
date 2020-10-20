@@ -2,7 +2,7 @@
 #define NARYTREE
 
 #include "token.h"
-#define NUM_NON_TERMINALS 37
+#define NUM_NON_TERMINALS 36
 
 static char *NONTERMINALS[NUM_NON_TERMINALS] = {
     "s",
@@ -39,7 +39,6 @@ static char *NONTERMINALS[NUM_NON_TERMINALS] = {
     "arithmetic_term",
     "op1",
     "op2",
-    "boolean_expr",
     "boolean_term",
     "boolean_factor"};
 
@@ -79,40 +78,49 @@ typedef enum NonTerminal
     arithmetic_term,
     op1,
     op2,
-    boolean_expr,
     boolean_term,
     boolean_factor
 } NonTerminal;
 
+struct nonleafnode
+{
+    NonTerminal nonterminal;
+    int ruleNo;
+    TreeNode *child;
+};
+typedef struct nonleafnode NonLeafNode;
+
 typedef TokenName Terminal;
+
+struct leafnode
+{
+    Terminal terminal;
+    Token *tok;
+};
+
+typedef struct leafnode LeafNode;
 
 typedef union
 {
-    Terminal terminal;
-    NonTerminal nonterminal;
+    LeafNode leafNode;
+    NonLeafNode nonLeafNode;
 } NodeType;
-
-struct treenodeinfo
-{
-    int terminal;
-    NodeType type;
-};
-typedef struct treenodeinfo TreeNodeInfo;
 
 struct treenode
 {
-    TreeNodeInfo *info;
-    struct treenode *child; // pointer to the leftmost child;
-    struct treenode *next;  // pointer to the next node in the same level
+    int isLeaf;
+    NodeType nodeType;
+    struct treenode *parent;
+    struct treenode *next; //next node in the same level
 };
 
 typedef struct treenode TreeNode;
 
-struct parseTree
-{
-    TreeNode *root;
-};
+// struct parseTree
+// {
+//     TreeNode *root;
+// };
 
-typedef struct parseTree ParseTree;
+// typedef struct parseTree ParseTree;
 
 #endif

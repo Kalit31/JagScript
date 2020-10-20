@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef GRAMMER_NODE
+#define GRAMMER_NODE
 
 struct node
 {
@@ -8,3 +8,5 @@ struct node
 };
 
 typedef struct node Node;
+
+#endif

@@ -1,11 +1,4 @@
 program ( )
 {
 declare v1 : integer ;
-declare list of variables abcd ghd2_1 ssd_2_3 : array [ 2 .. 5 ] of integer ;
-declare list of variables s1 s2, s3 : jagged array [ 4 .. 7 ] [ ] [ ] of integer ;
-R1 [ 4 ] : size 3 : values { 21 641 23 36 125 ; 54 221 43 ; 287 501 453 334 23 }
-abcd = ghd2 + ssd_2_3 ;
-new = d * e2 + w – 76875 ;
-v1 = a1 – a2 * d ;
-b1 = b2 &&& b3 ||| b1 ;
 }
