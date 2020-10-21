@@ -179,6 +179,7 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
 
             if (build(child, st, temp, g))
             {
+                curr->nodeType.nonLeafNode.ruleNo = rule;
                 return 1;
             }
             else
