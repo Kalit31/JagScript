@@ -48,8 +48,8 @@ rhs arithmetic_expr
 rhs boolean_expr
 arithmetic_expr arithmetic_term op1 arithmetic_expr
 arithmetic_expr arithmetic_term
-arithmetic_term IDX op2 arithmetic_term
-arithmetic_term IDX
+arithmetic_term idx op2 arithmetic_term
+arithmetic_term idx
 op1 PLUS 
 op1 MINUS
 op2 MULT

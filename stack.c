@@ -45,7 +45,7 @@ StackNode *top(Stack *st)
 {
     if (st->size == 0)
     {
-        printf("Stack is empty.");
+        printf("Stack is empty.\n");
         return NULL;
     }
     else

@@ -56,11 +56,14 @@ int findLastRuleIndex(int nonTerminalInd, Node *g)
 int build(TreeNode *curr, Stack *st, Token *s, Node *g)
 {
     StackNode *t = top(st);
+    if (s == NULL && t == NULL)
+    {
+        return 1;
+    }
     if (t->val->isLeaf)
     {
         int tokenIdTopStack = t->val->nodeType.leafNode.terminal;
         int tokenIdTokenStream = s->tokenName;
-        //printf("LEAF: %s\n", TOKENS[tokenIdTokenStream]);
         if (tokenIdTopStack == tokenIdTokenStream)
         {
             printf("POPPING %s\n", TOKENS[tokenIdTopStack]);
@@ -69,6 +72,7 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
         }
         else
         {
+            printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
             return 0;
         }
     }
@@ -78,12 +82,14 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
 
         int firstRuleNo = findRuleIndex(nonTerminalID, g);
         int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
-
         printf("POPPING %s\n", NONTERMINALS[st->head->val->nodeType.nonLeafNode.nonterminal]);
         pop(st);
 
+        int initialStackSize = st->size;
+        Token *temp = s;
         for (int rule = firstRuleNo; rule <= lastRuleNo; rule++)
         {
+            temp = s;
             int rhsSize = g[rule].ruleSize;
             Node *list[rhsSize];
 
@@ -108,7 +114,20 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
                 printf("PUSHING %s\n", list[i]->element);
                 push(st, n);
             }
-            build(curr, st, s, g);
+            if (build(curr, st, temp, g))
+            {
+                return 1;
+            }
+            else
+            {
+                while (st->size > initialStackSize)
+                {
+                    if (pop(st) == NULL)
+                    {
+                        return 0;
+                    };
+                }
+            }
         }
     }
     return 0;
@@ -126,5 +145,6 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     push(st, root);
 
     build(root, st, s, g);
+    printf("---------PARSING COMPLETED-------------\n");
     return root;
 }
