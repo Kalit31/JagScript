@@ -3,6 +3,7 @@
 
 #include "token.h"
 #define NUM_NON_TERMINALS 36
+#define NUM_RULES 62
 
 static char *NONTERMINALS[NUM_NON_TERMINALS] = {
     "s",
