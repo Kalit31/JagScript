@@ -53,6 +53,19 @@ int findLastRuleIndex(int nonTerminalInd, Node *g)
     return lastRuleInd;
 }
 
+void deleteChildren(TreeNode *node)
+{
+    TreeNode *child = node->nodeType.nonLeafNode.child;
+    while (child != NULL)
+    {
+        TreeNode *prev = child;
+        child = child->next;
+        free(prev);
+    }
+    node->nodeType.nonLeafNode.child = NULL;
+    return;
+}
+
 int build(TreeNode *curr, Stack *st, Token *s, Node *g)
 {
     StackNode *t = top(st);
@@ -60,15 +73,34 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
     {
         return 1;
     }
+    else if (s == NULL || t == NULL)
+    {
+        return 0;
+    }
+
     if (t->val->isLeaf)
     {
         int tokenIdTopStack = t->val->nodeType.leafNode.terminal;
         int tokenIdTokenStream = s->tokenName;
         if (tokenIdTopStack == tokenIdTokenStream)
         {
+            printf("CURR TREE NODE: %s\n", TOKENS[curr->nodeType.leafNode.terminal]);
             printf("POPPING %s\n", TOKENS[tokenIdTopStack]);
             pop(st);
-            return build(curr, st, s->next, g);
+            if (curr->next == NULL)
+            {
+                TreeNode *temp = curr->parent;
+                while (temp->next == NULL)
+                {
+                    if (temp->parent == NULL)
+                    {
+                        return 1;
+                    }
+                    temp = temp->parent;
+                }
+                return build(temp->next, st, s->next, g);
+            }
+            return build(curr->next, st, s->next, g);
         }
         else
         {
@@ -100,7 +132,12 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
                 list[ptrInd] = c;
                 c = c->nxt;
             }
-            for (int i = 0; i < rhsSize; i++)
+
+            TreeNode *childrenList[rhsSize];
+            TreeNode *child = curr->nodeType.nonLeafNode.child;
+            TreeNode *currSibling = child;
+            int ptr = 0;
+            for (int i = rhsSize - 1; i >= 0; i--)
             {
                 TreeNode *n;
                 if (list[i]->element[0] >= 65 && list[i]->element[0] <= 90)
@@ -111,15 +148,42 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
                 {
                     n = createNonLeafNode(findNonTerminal(list[i]->element));
                 }
-                printf("PUSHING %s\n", list[i]->element);
-                push(st, n);
+                if (child == NULL)
+                {
+                    child = n;
+                    currSibling = n;
+                    currSibling->next = NULL;
+                }
+                else
+                {
+                    currSibling->next = n;
+                    currSibling = currSibling->next;
+                }
+                n->parent = curr;
+                childrenList[ptr] = n;
+                ptr++;
             }
-            if (build(curr, st, temp, g))
+
+            for (int i = rhsSize - 1; i >= 0; i--)
+            {
+                if (childrenList[i]->isLeaf)
+                {
+                    printf("PUSHING %s\n", TOKENS[childrenList[i]->nodeType.leafNode.terminal]);
+                }
+                else
+                {
+                    printf("PUSHING %s\n", NONTERMINALS[childrenList[i]->nodeType.nonLeafNode.nonterminal]);
+                }
+                push(st, childrenList[i]);
+            }
+
+            if (build(child, st, temp, g))
             {
                 return 1;
             }
             else
             {
+                deleteChildren(curr);
                 while (st->size > initialStackSize)
                 {
                     if (pop(st) == NULL)
