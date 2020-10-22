@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parsetree.h"
+#include "typeExpression.h"
 #include "naryTree.c"
 #include "stack.c"
 

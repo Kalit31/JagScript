@@ -83,6 +83,67 @@ typedef enum NonTerminal
     boolean_factor
 } NonTerminal;
 
+typedef enum Type_Var
+{
+    PRIMITIVE,
+    RECTANGULAR_ARRAY,
+    JAGGED_ARRAY
+} Type_Var;
+
+typedef enum PrimType
+{
+    PRIM_INTEGER,
+    PRIM_REAL,
+    PRIM_BOOLEAN
+} PrimType;
+
+typedef struct RectangularArray
+{
+    int dimensions;   //2
+    int **dimenArray; //(2, 5), (3, 6)
+} RectangularArray;
+
+/*
+ int **dimenArray = (int **)malloc(dimensions * sizeof(int *)); 
+    for (i=0; i<dimensions; i++) 
+         arr[i] = (int *)malloc(2 * sizeof(int)); 
+*/
+
+typedef struct TwoDJaggedArray
+{
+    //(4, 7)
+    int r1Low;
+    int r1High;
+    int *r2; //(3, 6, 2, 4, 1, 5)
+} TwoDJaggedArray;
+
+typedef struct ThreeDJaggedArray
+{
+    //(4, 7)
+    int r1Low;
+    int r1High;
+    int **dimen; //3 [ 5, 3, 5] , 2 [ 3, 5], 3 [ 5, 4, 3] ,4 [ 2, 5, 4, 4]
+} ThreeDJaggedArray;
+
+typedef union JaggedArrayType
+{
+    TwoDJaggedArray twod_array;
+    ThreeDJaggedArray threed_array;
+} JaggedArrayType;
+
+typedef struct JaggedArray
+{
+    int is2D;
+    JaggedArrayType type;
+} JaggedArray;
+
+typedef union TypeExpression
+{
+    PrimType primitiveType;
+    RectangularArray rectTpe;
+    JaggedArray jaggedType;
+} TypeExpression;
+
 typedef struct treenode TreeNode;
 
 struct nonleafnode
@@ -90,6 +151,8 @@ struct nonleafnode
     NonTerminal nonterminal;
     int ruleNo;
     TreeNode *child;
+    Type_Var type;
+    TypeExpression expression;
 };
 typedef struct nonleafnode NonLeafNode;
 

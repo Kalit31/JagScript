@@ -3,6 +3,8 @@
 #include "ReadGrammar.c"
 #include "tokenizer.c"
 #include "parsetree.c"
+//Max to be fixed.
+#define MAX 1000
 
 int main()
 {
@@ -19,5 +21,7 @@ int main()
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
+
+    TypeExprEntry typeExprTable[MAX];
     return 0;
 }
