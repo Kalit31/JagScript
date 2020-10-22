@@ -4,6 +4,7 @@
 #include "token.h"
 #define NUM_NON_TERMINALS 36
 #define NUM_RULES 62
+#define MAX_DIMENSIONS 10
 
 static char *NONTERMINALS[NUM_NON_TERMINALS] = {
     "s",
@@ -99,15 +100,9 @@ typedef enum PrimType
 
 typedef struct RectangularArray
 {
-    int dimensions;   //2
-    int **dimenArray; //(2, 5), (3, 6)
+    int currDimensions;                //2
+    int dimenArray[MAX_DIMENSIONS][2]; //(2, 5), (3, 6)
 } RectangularArray;
-
-/*
- int **dimenArray = (int **)malloc(dimensions * sizeof(int *)); 
-    for (i=0; i<dimensions; i++) 
-         arr[i] = (int *)malloc(2 * sizeof(int)); 
-*/
 
 typedef struct TwoDJaggedArray
 {
@@ -140,7 +135,7 @@ typedef struct JaggedArray
 typedef union TypeExpression
 {
     PrimType primitiveType;
-    RectangularArray rectTpe;
+    RectangularArray rectType;
     JaggedArray jaggedType;
 } TypeExpression;
 

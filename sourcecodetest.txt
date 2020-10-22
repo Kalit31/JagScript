@@ -1,5 +1,6 @@
 program ( )
 {
-declare list of variables v1 v2 : integer ;
-v1 = 5 ;
+declare a : array [ 2 .. 5 ] [ 3 .. 6 ] of integer ;
+declare v1 : integer ;
+a [ 2 5 ] = 5 ;
 }
