@@ -1,5 +1,5 @@
 program ( )
 {
-declare v1 : integer ;
+declare list of variables v1 v2 : integer ;
 v1 = 5 ;
 }

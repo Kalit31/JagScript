@@ -5,6 +5,8 @@
 #include "naryTree.c"
 #include "stack.c"
 
+static int currentTableEntry = 0;
+
 int findTerminal(char *s)
 {
     for (int i = 0; i < NUM_TOKENS; i++)
@@ -237,7 +239,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         TreeNode *declStmts = root->nodeType.nonLeafNode.child;
         //Traverse Declaration Subtree
         traverseParseTree(declStmts, table);
-
+        //Traverse Assignment Subtree
         TreeNode *assgnStmts = declStmts->next;
         traverseParseTree(assgnStmts, table);
     }
@@ -304,6 +306,30 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // curr node is rectangular array declaration
         root->nodeType.nonLeafNode.type = RECTANGULAR_ARRAY;
+        TreeNode *rectDeclChild = root->nodeType.nonLeafNode.child;
+        TreeNode *declareVarsNode = NULL;
+
+        while (rectDeclChild->next != NULL)
+        {
+            if (rectDeclChild->isLeaf == 0)
+            {
+                if (rectDeclChild->nodeType.nonLeafNode.nonterminal == 8)
+                {
+                    declareVarsNode = rectDeclChild;
+                }
+                else if (rectDeclChild->nodeType.nonLeafNode.nonterminal == 10)
+                {
+                    TreeNode *rectArrChild = rectDeclChild->nodeType.nonLeafNode.child;
+                    traverseParseTree(rectArrChild, table);
+                }
+            }
+            rectDeclChild = rectDeclChild->next;
+        }
+        traverseParseTree(declareVarsNode, table);
+    }
+    else if (nonTerminalId == 10)
+    {
+        // curr node is rect_arr
     }
     else if (nonTerminalId == 7)
     {
@@ -313,17 +339,57 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     else if (nonTerminalId == 8)
     {
         // curr node is declare_vars node
-        TreeNode *parent = root->parent;
-        root->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
-        root->nodeType.nonLeafNode.expression = parent->nodeType.nonLeafNode.expression;
-        TreeNode *leftMostId = root->nodeType.nonLeafNode.child;
-        table->name = leftMostId->nodeType.leafNode.tok->lexeme;
-        table->type = PRIMITIVE;
-        table->rectArrayType = NOT_APPLICABLE;
-        table->typeExpr = root->nodeType.nonLeafNode.expression;
-        if (leftMostId->next != NULL)
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+        if (child->next == NULL)
         {
-            traverseParseTree(leftMostId->next, table);
+            // single variable
+            TreeNode *parent = root->parent;
+            TreeNode *IDNode = root->nodeType.nonLeafNode.child;
+            table[currentTableEntry].name = IDNode->nodeType.leafNode.tok->lexeme;
+            table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
+            if (table[currentTableEntry].type == RECTANGULAR_ARRAY)
+            {
+                // To be done
+            }
+            else
+            {
+                table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
+            }
+            table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
+            currentTableEntry++;
+        }
+        else
+        {
+            // list of variables
+            traverseParseTree(child, table);
+        }
+    }
+    else if (nonTerminalId == 12)
+    {
+        // curr node is var_name_list
+        TreeNode *parent = root->parent; // Parent is declare_vars or var_names_list
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+
+        table[currentTableEntry].name = child->nodeType.leafNode.tok->lexeme;
+        table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
+        if (table->type == RECTANGULAR_ARRAY)
+        {
+            // To be done
+        }
+        else
+        {
+            table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
+        }
+        table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
+        currentTableEntry++;
+
+        if (child->next != NULL)
+        {
+            // next node is var_name_list
+            TreeNode *varNameListNode = child->next;
+            varNameListNode->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
+            varNameListNode->nodeType.nonLeafNode.expression = parent->nodeType.nonLeafNode.expression;
+            traverseParseTree(varNameListNode, table);
         }
     }
     return;
