@@ -23,5 +23,7 @@ int main()
     t = createParseTree(t, ts, arr);
 
     TypeExprEntry typeExprTable[MAX];
+    traverseParseTree(t, typeExprTable);
+
     return 0;
 }

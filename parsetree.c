@@ -85,8 +85,8 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
         int tokenIdTokenStream = s->tokenName;
         if (tokenIdTopStack == tokenIdTokenStream)
         {
-            printf("CURR TREE NODE: %s\n", TOKENS[curr->nodeType.leafNode.terminal]);
-            printf("POPPING %s\n", TOKENS[tokenIdTopStack]);
+            //printf("CURR TREE NODE: %s\n", TOKENS[curr->nodeType.leafNode.terminal]);
+            //printf("POPPING %s\n", TOKENS[tokenIdTopStack]);
             pop(st);
             if (curr->next == NULL)
             {
@@ -105,7 +105,7 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
         }
         else
         {
-            printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
+            //printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
             return 0;
         }
     }
@@ -115,7 +115,7 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
 
         int firstRuleNo = findRuleIndex(nonTerminalID, g);
         int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
-        printf("POPPING %s\n", NONTERMINALS[st->head->val->nodeType.nonLeafNode.nonterminal]);
+        //printf("POPPING %s\n", NONTERMINALS[st->head->val->nodeType.nonLeafNode.nonterminal]);
         pop(st);
 
         int initialStackSize = st->size;
@@ -164,17 +164,18 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
                 childrenList[ptr] = n;
                 ptr++;
             }
+            curr->nodeType.nonLeafNode.child = child;
 
             for (int i = rhsSize - 1; i >= 0; i--)
             {
-                if (childrenList[i]->isLeaf)
+                /*if (childrenList[i]->isLeaf)
                 {
                     printf("PUSHING %s\n", TOKENS[childrenList[i]->nodeType.leafNode.terminal]);
                 }
                 else
                 {
                     printf("PUSHING %s\n", NONTERMINALS[childrenList[i]->nodeType.nonLeafNode.nonterminal]);
-                }
+                }*/
                 push(st, childrenList[i]);
             }
 
@@ -199,9 +200,6 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
     return 0;
 }
 
-// Think of an algorithm for parsing. Currently, the idea is to implement
-//  a recursive one with backtrackong, but it is not working :(
-
 TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
 {
     int error = 0;
@@ -213,4 +211,29 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     build(root, st, s, g);
     printf("---------PARSING COMPLETED-------------\n");
     return root;
+}
+
+void traverseParseTree(TreeNode *root, TypeExprEntry *table)
+{
+    printf("TRAVERSING...\n");
+
+    NonLeafNode node = root->nodeType.nonLeafNode;
+    printf("NONTERMINAL: %d\n", node.nonterminal);
+
+    TreeNode *curr = root->nodeType.nonLeafNode.child;
+    while (curr->isLeaf == 1)
+    {
+        curr = curr->next;
+    }
+    if (curr->nodeType.nonLeafNode.nonterminal == 1)
+    {
+        printf("INSIDE LIST OF STATEMENTS\n");
+        //Current Node is List Of Statements
+        //Traverse the declaration statements subtree
+        TreeNode *declNode = curr->nodeType.nonLeafNode.child;
+        traverseParseTree(declNode, table);
+        //Traverse the assignments statements subtree
+        TreeNode *assgnNode = declNode->next;
+        traverseParseTree(assgnNode, table);
+    }
 }
