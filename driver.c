@@ -22,7 +22,7 @@ int main()
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
 
-    TypeExprEntry typeExprTable[MAX];
+    TypeExprEntry *typeExprTable = (TypeExprEntry *)malloc(sizeof(TypeExprEntry) * MAX);
     traverseParseTree(t, typeExprTable);
 
     return 0;

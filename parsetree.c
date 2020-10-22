@@ -88,6 +88,7 @@ int build(TreeNode *curr, Stack *st, Token *s, Node *g)
             //printf("CURR TREE NODE: %s\n", TOKENS[curr->nodeType.leafNode.terminal]);
             //printf("POPPING %s\n", TOKENS[tokenIdTopStack]);
             pop(st);
+            t->val->nodeType.leafNode.tok = s;
             if (curr->next == NULL)
             {
                 TreeNode *temp = curr->parent;
@@ -215,25 +216,115 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
 
 void traverseParseTree(TreeNode *root, TypeExprEntry *table)
 {
-    printf("TRAVERSING...\n");
-
-    NonLeafNode node = root->nodeType.nonLeafNode;
-    printf("NONTERMINAL: %d\n", node.nonterminal);
-
-    TreeNode *curr = root->nodeType.nonLeafNode.child;
-    while (curr->isLeaf == 1)
+    while (root->isLeaf == 1 && root->next != NULL)
     {
-        curr = curr->next;
+        root = root->next;
     }
-    if (curr->nodeType.nonLeafNode.nonterminal == 1)
+    if (root->isLeaf == 1 && root->next == NULL)
     {
-        printf("INSIDE LIST OF STATEMENTS\n");
-        //Current Node is List Of Statements
-        //Traverse the declaration statements subtree
-        TreeNode *declNode = curr->nodeType.nonLeafNode.child;
-        traverseParseTree(declNode, table);
-        //Traverse the assignments statements subtree
-        TreeNode *assgnNode = declNode->next;
-        traverseParseTree(assgnNode, table);
+        return;
     }
+
+    int nonTerminalId = root->nodeType.nonLeafNode.nonterminal;
+    if (nonTerminalId == 0)
+    {
+        // curr node is 's' : Start Symbol
+        traverseParseTree(root->nodeType.nonLeafNode.child, table);
+    }
+    else if (nonTerminalId == 1)
+    {
+        // curr node is list of statements
+        TreeNode *declStmts = root->nodeType.nonLeafNode.child;
+        //Traverse Declaration Subtree
+        traverseParseTree(declStmts, table);
+
+        TreeNode *assgnStmts = declStmts->next;
+        traverseParseTree(assgnStmts, table);
+    }
+    else if (nonTerminalId == 2)
+    {
+        // curr node is declaration statements
+        TreeNode *singleDeclaration = root->nodeType.nonLeafNode.child;
+
+        //Traverse single declaration statement
+        traverseParseTree(singleDeclaration, table);
+
+        if (singleDeclaration->next != NULL)
+        {
+            traverseParseTree(singleDeclaration->next, table);
+        }
+    }
+    else if (nonTerminalId == 4)
+    {
+        // curr node is a single declaration statement;
+        TreeNode *typeOfDecl = root->nodeType.nonLeafNode.child;
+        traverseParseTree(typeOfDecl, table);
+    }
+    else if (nonTerminalId == 5)
+    {
+        // curr node is primitive declaration
+        root->nodeType.nonLeafNode.type = PRIMITIVE;
+        TreeNode *primDeclChild = root->nodeType.nonLeafNode.child;
+        TreeNode *declareVarsNode = NULL;
+
+        PrimType primType;
+
+        while (primDeclChild->next != NULL)
+        {
+            if (primDeclChild->isLeaf == 0)
+            {
+                if (primDeclChild->nodeType.nonLeafNode.nonterminal == 8)
+                {
+                    declareVarsNode = primDeclChild;
+                }
+                else if (primDeclChild->nodeType.nonLeafNode.nonterminal == 9)
+                {
+                    TreeNode *leaf = primDeclChild->nodeType.nonLeafNode.child;
+                    if (leaf->nodeType.leafNode.terminal == 9)
+                    {
+                        primType = PRIM_INTEGER;
+                    }
+                    else if (leaf->nodeType.leafNode.terminal == 10)
+                    {
+                        primType = PRIM_REAL;
+                    }
+                    else
+                    {
+                        primType = PRIM_BOOLEAN;
+                    }
+                }
+            }
+            primDeclChild = primDeclChild->next;
+        }
+
+        root->nodeType.nonLeafNode.expression.primitiveType = primType;
+        traverseParseTree(declareVarsNode, table);
+    }
+    else if (nonTerminalId == 6)
+    {
+        // curr node is rectangular array declaration
+        root->nodeType.nonLeafNode.type = RECTANGULAR_ARRAY;
+    }
+    else if (nonTerminalId == 7)
+    {
+        // curr node is jagged arrayd declaration
+        root->nodeType.nonLeafNode.type = JAGGED_ARRAY;
+    }
+    else if (nonTerminalId == 8)
+    {
+        // curr node is declare_vars node
+        TreeNode *parent = root->parent;
+        root->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
+        root->nodeType.nonLeafNode.expression = parent->nodeType.nonLeafNode.expression;
+        TreeNode *leftMostId = root->nodeType.nonLeafNode.child;
+        table->name = leftMostId->nodeType.leafNode.tok->lexeme;
+        table->type = PRIMITIVE;
+        table->rectArrayType = NOT_APPLICABLE;
+        table->typeExpr = root->nodeType.nonLeafNode.expression;
+        if (leftMostId->next != NULL)
+        {
+            traverseParseTree(leftMostId->next, table);
+        }
+    }
+    return;
 }
