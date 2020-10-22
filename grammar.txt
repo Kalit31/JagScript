@@ -3,18 +3,18 @@ list_of_statements declaration_statements assignment_statements
 declaration_statements declaration declaration_statements 
 declaration_statements declaration
 declaration primitive_decl  
+declaration rect_array_decl
 declaration jagged_array_decl
-primitive_decl DECLARE declare_vars COLON declaration_type SEMICOLON
+primitive_decl DECLARE declare_vars COLON primitive_type SEMICOLON
+rect_array_decl DECLARE declare_vars COLON rect_array SEMICOLON
 jagged_array_decl DECLARE declare_vars COLON declare_jagged
 declare_vars ID  
 declare_vars LIST OF VARIABLES var_name_list
 var_name_list ID var_name_list 
 var_name_list ID
-declaration_type primitive  
-declaration_type rect_array
-primitive INTEGER 
-primitive REAL
-primitive BOOLEAN
+primitive_type INTEGER 
+primitive_type REAL
+primitive_type BOOLEAN
 rect_array ARRAY array_dim OF INTEGER
 array_dim SBOP idx TWODOT idx SBCL array_dim
 array_dim SBOP idx TWODOT idx  SBCL
