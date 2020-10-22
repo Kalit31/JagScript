@@ -6,6 +6,29 @@
 //Max to be fixed.
 #define MAX 1000
 
+void preorder(TreeNode *root)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+    if (root->isLeaf)
+    {
+        printf("%s ", TOKENS[root->nodeType.leafNode.terminal]);
+        return;
+    }
+    else
+    {
+        printf("%s ", NONTERMINALS[root->nodeType.nonLeafNode.nonterminal]);
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+        while (child != NULL)
+        {
+            preorder(child);
+            child = child->next;
+        }
+    }
+}
+
 int main()
 {
     Node *arr = (Node *)malloc(sizeof(Node) * NUM_RULES);
@@ -21,6 +44,8 @@ int main()
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
+    TreeNode *root = t;
+    preorder(root);
 
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;

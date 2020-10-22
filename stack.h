@@ -5,7 +5,9 @@
 
 struct stackNode
 {
-    TreeNode *val;
+    // TreeNode *val;
+    int terminal;
+    int id;
     struct stackNode *nxt;
 };
 

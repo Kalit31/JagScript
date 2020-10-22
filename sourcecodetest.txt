@@ -1,6 +1,6 @@
 program ( )
 {
-declare a : array [ 2 .. 5 ] [ 3 .. 6 ] of integer ;
-declare v1 : integer ;
-a [ 2 5 ] = 5 ;
+declare v : boolean ; 
+declare a : array [ v .. 5 ] of integer ;
+a [ 5 ] = 5 ;
 }
