@@ -245,204 +245,240 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     }
 
     int nonTerminalId = root->nodeType.nonLeafNode.nonterminal;
-    if (nonTerminalId == 0)
-    {
-        // curr node is 's' : Start Symbol
-        traverseParseTree(root->nodeType.nonLeafNode.child, table);
-    }
-    else if (nonTerminalId == 1)
-    {
-        // curr node is list of statements
-        TreeNode *declStmts = root->nodeType.nonLeafNode.child;
-        //Traverse Declaration Subtree
-        traverseParseTree(declStmts, table);
-        //Traverse Assignment Subtree
-        TreeNode *assgnStmts = declStmts->next;
-        traverseParseTree(assgnStmts, table);
-    }
-    else if (nonTerminalId == 2)
-    {
-        // curr node is declaration statements
-        TreeNode *singleDeclaration = root->nodeType.nonLeafNode.child;
-
-        //Traverse single declaration statement
-        traverseParseTree(singleDeclaration, table);
-
-        if (singleDeclaration->next != NULL)
+    switch(nonTerminalId){
+        case s:
         {
-            traverseParseTree(singleDeclaration->next, table);
+            // curr node is 's' : Start Symbol
+            traverseParseTree(root->nodeType.nonLeafNode.child, table);
+            break;
         }
-    }
-    else if (nonTerminalId == 4)
-    {
-        // curr node is a single declaration statement;
-        TreeNode *typeOfDecl = root->nodeType.nonLeafNode.child;
-        traverseParseTree(typeOfDecl, table);
-    }
-    else if (nonTerminalId == 5)
-    {
-        // curr node is primitive declaration
-        root->nodeType.nonLeafNode.type = PRIMITIVE;
-        TreeNode *primDeclChild = root->nodeType.nonLeafNode.child;
-        TreeNode *declareVarsNode = NULL;
-
-        PrimType primType;
-
-        while (primDeclChild->next != NULL)
+        case list_of_statements:
         {
-            if (primDeclChild->isLeaf == 0)
+            // curr node is list of statements
+            TreeNode *declStmts = root->nodeType.nonLeafNode.child;
+            //Traverse Declaration Subtree
+            traverseParseTree(declStmts, table);
+            //Traverse Assignment Subtree
+            TreeNode *assgnStmts = declStmts->next;
+            traverseParseTree(assgnStmts, table);
+            break;
+        }
+        case declaration_statements:
+        {
+            // curr node is declaration statements
+            TreeNode *singleDeclaration = root->nodeType.nonLeafNode.child;
+
+            //Traverse single declaration statement
+            traverseParseTree(singleDeclaration, table);
+
+            if (singleDeclaration->next != NULL)
             {
-                if (primDeclChild->nodeType.nonLeafNode.nonterminal == 8)
-                {
-                    declareVarsNode = primDeclChild;
-                }
-                else if (primDeclChild->nodeType.nonLeafNode.nonterminal == 9)
-                {
-                    TreeNode *leaf = primDeclChild->nodeType.nonLeafNode.child;
-                    if (leaf->nodeType.leafNode.terminal == 9)
-                    {
-                        primType = PRIM_INTEGER;
-                    }
-                    else if (leaf->nodeType.leafNode.terminal == 10)
-                    {
-                        primType = PRIM_REAL;
-                    }
-                    else
-                    {
-                        primType = PRIM_BOOLEAN;
-                    }
-                }
+                traverseParseTree(singleDeclaration->next, table);
             }
-            primDeclChild = primDeclChild->next;
+            break;
         }
-
-        root->nodeType.nonLeafNode.expression.primitiveType = primType;
-        traverseParseTree(declareVarsNode, table);
-    }
-    else if (nonTerminalId == 6)
-    {
-        // curr node is rectangular array declaration
-        root->nodeType.nonLeafNode.type = RECTANGULAR_ARRAY;
-        RectangularArray rectArr;
-        rectArr.currDimensions = 0;
-        root->nodeType.nonLeafNode.expression.rectType = rectArr;
-        TreeNode *rectDeclChild = root->nodeType.nonLeafNode.child;
-        TreeNode *declareVarsNode = NULL;
-
-        while (rectDeclChild->next != NULL)
+        case declaration:
         {
-            if (rectDeclChild->isLeaf == 0)
+            // curr node is a single declaration statement;
+            TreeNode *typeOfDecl = root->nodeType.nonLeafNode.child;
+            traverseParseTree(typeOfDecl, table);
+            break;
+        }
+        case primitive_decl:
+        {
+            // curr node is primitive declaration
+            root->nodeType.nonLeafNode.type = PRIMITIVE;
+            TreeNode *primDeclChild = root->nodeType.nonLeafNode.child;
+            TreeNode *declareVarsNode = NULL;
+
+            PrimType primType;
+
+            while (primDeclChild->next != NULL)
             {
-                if (rectDeclChild->nodeType.nonLeafNode.nonterminal == 8)
+                if (primDeclChild->isLeaf == 0)
                 {
-                    declareVarsNode = rectDeclChild;
-                }
-                else if (rectDeclChild->nodeType.nonLeafNode.nonterminal == 10)
-                {
-                    // rectArrChild points to node ARRAY(Terminal)
-                    TreeNode *rectArrChild = rectDeclChild->nodeType.nonLeafNode.child;
-                    // now, rectArrChild points to node array_dim
-                    rectArrChild = rectArrChild->next;
-                    // dimenChild points to SBOP
-                    TreeNode *dimenChild = rectArrChild->nodeType.nonLeafNode.child;
-                    while (1)
+                    if (primDeclChild->nodeType.nonLeafNode.nonterminal == 8)
                     {
-                        //dimenChild now points to idx
-                        dimenChild = dimenChild->next;
-
-                        TreeNode *term = dimenChild->nodeType.nonLeafNode.child;
-                        if (term->nodeType.leafNode.terminal == 29)
+                        declareVarsNode = primDeclChild;
+                    }
+                    else if (primDeclChild->nodeType.nonLeafNode.nonterminal == 9)
+                    {
+                        TreeNode *leaf = primDeclChild->nodeType.nonLeafNode.child;
+                        if (leaf->nodeType.leafNode.terminal == 9)
                         {
-                            // idx is a ID
-                            typeCheckVariableIsInteger(table, term->nodeType.leafNode.tok->lexeme);
-                            rectArr.dimenArray[rectArr.currDimensions][0] = -1;
+                            primType = PRIM_INTEGER;
+                        }
+                        else if (leaf->nodeType.leafNode.terminal == 10)
+                        {
+                            primType = PRIM_REAL;
                         }
                         else
                         {
-                            // idx is a NUM
-                            rectArr.dimenArray[rectArr.currDimensions][0] = convertStringToInteger(term->nodeType.leafNode.tok->lexeme);
-                            printf("D: %d\n", rectArr.dimenArray[rectArr.currDimensions][0]);
+                            primType = PRIM_BOOLEAN;
                         }
+                    }
+                }
+                primDeclChild = primDeclChild->next;
+            }
 
-                        //dimenChild now points to ..
-                        dimenChild = dimenChild->next;
-                        //dimenChild now points to idx
-                        dimenChild = dimenChild->next;
+            root->nodeType.nonLeafNode.expression.primitiveType = primType;
+            traverseParseTree(declareVarsNode, table);
+            break;
+        }
+        case rect_array_decl:
+        {
+            // curr node is rectangular array declaration
+            root->nodeType.nonLeafNode.type = RECTANGULAR_ARRAY;
+            RectangularArray rectArr;
+            rectArr.currDimensions = 0;
+            root->nodeType.nonLeafNode.expression.rectType = rectArr;
+            TreeNode *rectDeclChild = root->nodeType.nonLeafNode.child;
+            TreeNode *declareVarsNode = NULL;
 
-                        term = dimenChild->nodeType.nonLeafNode.child;
-                        if (term->nodeType.leafNode.terminal == 29)
+            while (rectDeclChild->next != NULL)
+            {
+                if (rectDeclChild->isLeaf == 0)
+                {
+                    if (rectDeclChild->nodeType.nonLeafNode.nonterminal == 8)
+                    {
+                        declareVarsNode = rectDeclChild;
+                    }
+                    else if (rectDeclChild->nodeType.nonLeafNode.nonterminal == 10)
+                    {
+                        // rectArrChild points to node ARRAY(Terminal)
+                        TreeNode *rectArrChild = rectDeclChild->nodeType.nonLeafNode.child;
+                        // now, rectArrChild points to node array_dim
+                        rectArrChild = rectArrChild->next;
+                        // dimenChild points to SBOP
+                        TreeNode *dimenChild = rectArrChild->nodeType.nonLeafNode.child;
+                        while (1)
                         {
-                            // idx is a ID
-                            typeCheckVariableIsInteger(table, term->nodeType.leafNode.tok->lexeme);
-                            rectArr.dimenArray[rectArr.currDimensions][1] = -1;
-                        }
-                        else
-                        {
-                            // idx is a NUM
-                            rectArr.dimenArray[rectArr.currDimensions][1] = convertStringToInteger(term->nodeType.leafNode.tok->lexeme);
-                            printf("D: %d\n", rectArr.dimenArray[rectArr.currDimensions][1]);
-                        }
-
-                        //dimenChild now points to SBCL
-                        dimenChild = dimenChild->next;
-                        if (dimenChild->next != NULL)
-                        {
-                            rectArr.currDimensions++;
-                            //dimenChild now points to array_dim
+                            //dimenChild now points to idx
                             dimenChild = dimenChild->next;
-                            //dimenChild now points to SBOP
-                            dimenChild = dimenChild->nodeType.nonLeafNode.child;
+
+                            TreeNode *term = dimenChild->nodeType.nonLeafNode.child;
+                            if (term->nodeType.leafNode.terminal == 29)
+                            {
+                                // idx is a ID
+                                typeCheckVariableIsInteger(table, term->nodeType.leafNode.tok->lexeme);
+                                rectArr.dimenArray[rectArr.currDimensions][0] = -1;
+                            }
+                            else
+                            {
+                                // idx is a NUM
+                                rectArr.dimenArray[rectArr.currDimensions][0] = convertStringToInteger(term->nodeType.leafNode.tok->lexeme);
+                                printf("D: %d\n", rectArr.dimenArray[rectArr.currDimensions][0]);
+                            }
+
+                            //dimenChild now points to ..
+                            dimenChild = dimenChild->next;
+                            //dimenChild now points to idx
+                            dimenChild = dimenChild->next;
+
+                            term = dimenChild->nodeType.nonLeafNode.child;
+                            if (term->nodeType.leafNode.terminal == 29)
+                            {
+                                // idx is a ID
+                                typeCheckVariableIsInteger(table, term->nodeType.leafNode.tok->lexeme);
+                                rectArr.dimenArray[rectArr.currDimensions][1] = -1;
+                            }
+                            else
+                            {
+                                // idx is a NUM
+                                rectArr.dimenArray[rectArr.currDimensions][1] = convertStringToInteger(term->nodeType.leafNode.tok->lexeme);
+                                printf("D: %d\n", rectArr.dimenArray[rectArr.currDimensions][1]);
+                            }
+
+                            //dimenChild now points to SBCL
+                            dimenChild = dimenChild->next;
+                            if (dimenChild->next != NULL)
+                            {
+                                rectArr.currDimensions++;
+                                //dimenChild now points to array_dim
+                                dimenChild = dimenChild->next;
+                                //dimenChild now points to SBOP
+                                dimenChild = dimenChild->nodeType.nonLeafNode.child;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
-                        else
-                        {
-                            break;
-                        }
+                        traverseParseTree(rectArrChild, table);
                     }
-                    traverseParseTree(rectArrChild, table);
                 }
+                rectDeclChild = rectDeclChild->next;
             }
-            rectDeclChild = rectDeclChild->next;
+            traverseParseTree(declareVarsNode, table);
+            break;
         }
-        traverseParseTree(declareVarsNode, table);
-    }
-    else if (nonTerminalId == 10)
-    {
-        // curr node is rect_arr
-        // TreeNode *parent = root->parent;
-        // root->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
-        // RectangularArray rectArr;
-        // rectArr.currDimensions = 0;
-        // traverseParseTree(root->nodeType.nonLeafNode.child, table);
-    }
-    else if (nonTerminalId == 13)
-    {
-        // TreeNode *child = root->nodeType.nonLeafNode.child;
-        // while (child->next != NULL)
-        // {
-        //     if (child->isLeaf == 0)
-        //     {
-        //         if(child)
-        //     }
-        //     child = child->next;
-        // }
-    }
-    else if (nonTerminalId == 7)
-    {
-        // curr node is jagged arrayd declaration
-        root->nodeType.nonLeafNode.type = JAGGED_ARRAY;
-    }
-    else if (nonTerminalId == 8)
-    {
-        // curr node is declare_vars node
-        TreeNode *child = root->nodeType.nonLeafNode.child;
-        if (child->next == NULL)
+        case rect_array:
         {
-            // single variable
-            TreeNode *parent = root->parent;
-            TreeNode *IDNode = root->nodeType.nonLeafNode.child;
-            table[currentTableEntry].name = IDNode->nodeType.leafNode.tok->lexeme;
+            // curr node is rect_arr
+            // TreeNode *parent = root->parent;
+            // root->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
+            // RectangularArray rectArr;
+            // rectArr.currDimensions = 0;
+            // traverseParseTree(root->nodeType.nonLeafNode.child, table);
+            break;
+        }
+        case array_dim:
+        {
+            // TreeNode *child = root->nodeType.nonLeafNode.child;
+            // while (child->next != NULL)
+            // {
+            //     if (child->isLeaf == 0)
+            //     {
+            //         if(child)
+            //     }
+            //     child = child->next;
+            // }
+            break;
+        }
+        case jagged_array_decl:
+        {
+            // curr node is jagged arrayd declaration
+            root->nodeType.nonLeafNode.type = JAGGED_ARRAY;
+            break;
+        }
+        case declare_vars:
+        {
+            // curr node is declare_vars node
+            TreeNode *child = root->nodeType.nonLeafNode.child;
+            if (child->next == NULL)
+            {
+                // single variable
+                TreeNode *parent = root->parent;
+                TreeNode *IDNode = root->nodeType.nonLeafNode.child;
+                table[currentTableEntry].name = IDNode->nodeType.leafNode.tok->lexeme;
+                table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
+                if (table[currentTableEntry].type == RECTANGULAR_ARRAY)
+                {
+                    // To be done
+                }
+                else
+                {
+                    table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
+                }
+                table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
+                currentTableEntry++;
+            }
+            else
+            {
+                // list of variables
+                traverseParseTree(child, table);
+            }
+            break;
+        }
+        case var_name_list:
+        {
+            // curr node is var_name_list
+            TreeNode *parent = root->parent; // Parent is declare_vars or var_names_list
+            TreeNode *child = root->nodeType.nonLeafNode.child;
+
+            table[currentTableEntry].name = child->nodeType.leafNode.tok->lexeme;
             table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
-            if (table[currentTableEntry].type == RECTANGULAR_ARRAY)
+            if (table->type == RECTANGULAR_ARRAY)
             {
                 // To be done
             }
@@ -452,40 +488,17 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
             currentTableEntry++;
-        }
-        else
-        {
-            // list of variables
-            traverseParseTree(child, table);
-        }
-    }
-    else if (nonTerminalId == 12)
-    {
-        // curr node is var_name_list
-        TreeNode *parent = root->parent; // Parent is declare_vars or var_names_list
-        TreeNode *child = root->nodeType.nonLeafNode.child;
 
-        table[currentTableEntry].name = child->nodeType.leafNode.tok->lexeme;
-        table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
-        if (table->type == RECTANGULAR_ARRAY)
-        {
-            // To be done
+            if (child->next != NULL)
+            {
+                // next node is var_name_list
+                TreeNode *varNameListNode = child->next;
+                varNameListNode->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
+                varNameListNode->nodeType.nonLeafNode.expression = parent->nodeType.nonLeafNode.expression;
+                traverseParseTree(varNameListNode, table);
+            }
+            break;
         }
-        else
-        {
-            table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
-        }
-        table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
-        currentTableEntry++;
-
-        if (child->next != NULL)
-        {
-            // next node is var_name_list
-            TreeNode *varNameListNode = child->next;
-            varNameListNode->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
-            varNameListNode->nodeType.nonLeafNode.expression = parent->nodeType.nonLeafNode.expression;
-            traverseParseTree(varNameListNode, table);
-        }
+        return;
     }
-    return;
 }
