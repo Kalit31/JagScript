@@ -463,6 +463,27 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // curr node is jagged arrayd declaration
         root->nodeType.nonLeafNode.type = JAGGED_ARRAY;
+        TreeNode *declareVarsNode = (root->nodeType.nonLeafNode.child)->next;
+        TreeNode *declareJagged = (declareVarsNode->next)->next;
+        JaggedArray jaggArr;
+        // TODO
+        traverseParseTree(declareJagged, table);
+        traverseParseTree(declareVarsNode, table);
+        break;
+    }
+    case declare_jagged:
+    {
+        // TODO
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+        traverseParseTree(child, table);
+        break;
+    }
+    case declare_twod_jagged:{
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+
+        break;
+    }
+    case declare_threed_jagged:{
         break;
     }
     case declare_vars:
@@ -523,6 +544,5 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         break;
     }
-        return;
     }
 }

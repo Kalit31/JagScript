@@ -41,4 +41,21 @@ TreeNode *createNode(int isLeafNode, int enumid, TreeNode *parent)
     return node;
 }
 
+TreeNode *nthSibling(TreeNode* child, int n){
+    TreeNode *curr = child;
+    for(int i=0; i<n; i++){
+        if(curr==NULL){
+            printf("Index out of Bounds Error for N-Ary Tree\n");
+            exit(1);
+        }
+        curr=curr->next;
+    }
+    return curr;
+}
+
+TreeNode *nthChild(TreeNode* root, int n){
+    TreeNode *child = root->nodeType.nonLeafNode.child;
+    return nthSibling(child, n);
+}
+
 void addRuleToParseTree(TreeNode *n);

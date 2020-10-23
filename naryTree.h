@@ -187,5 +187,7 @@ TreeNode *createLeafNode(Terminal terminal);
 TreeNode *createNonLeafNode(NonTerminal nonterminal);
 TreeNode *createNode(int isLeafNode, int enumid, TreeNode *parent);
 void addRuleToParseTree(TreeNode *n);
+TreeNode *nthSibling(TreeNode* child, int n);
+TreeNode *nthChild(TreeNode* root, int n);
 
 #endif
