@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "ReadGrammar.c"
 #include "tokenizer.c"
 #include "parsetree.c"
@@ -31,6 +32,7 @@ void preorder(TreeNode *root)
 
 int main()
 {
+    clock_t begin = clock();
     Node *arr = (Node *)malloc(sizeof(Node) * NUM_RULES);
     char *fileName = "grammar.txt";
     readGrammar(fileName, arr);
@@ -45,11 +47,16 @@ int main()
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
     TreeNode *root = t;
-    preorder(root);
+    //preorder(root);
+    //printf("\n");
 
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;
     traverseParseTree(t, typeExprTable);
+
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("TIME SPENT: %lf\n", time_spent);
 
     return 0;
 }

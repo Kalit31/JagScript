@@ -223,7 +223,7 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
 void checkArrayVariableIsInteger(TypeExprEntry *table, char *varName)
 {
     int i = 0;
-    for (i = 0; i < 1; i++)
+    for (i = 0; i < currentTableEntry; i++)
     {
         if (strcmp(table[i].name, varName) == 0)
         {
@@ -236,6 +236,10 @@ void checkArrayVariableIsInteger(TypeExprEntry *table, char *varName)
         if (table[i].typeExpr.primitiveType == PRIM_BOOLEAN)
         {
             printf("The array index variable is BOOLEAN\n");
+        }
+        else if (table[i].typeExpr.primitiveType == PRIM_REAL)
+        {
+            printf("The array index variable is REAL\n");
         }
     }
     //  return 1;
@@ -251,6 +255,42 @@ int convertStringToInteger(char *s)
         i++;
     }
     return result;
+}
+
+void populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
+{
+    TreeNode *parent = root->parent;
+    TreeNode *node = root->nodeType.nonLeafNode.child;
+    table[currentTableEntry].name = node->nodeType.leafNode.tok->lexeme;
+    table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
+    if (table[currentTableEntry].type == RECTANGULAR_ARRAY)
+    {
+        RectangularArray rectArr = parent->nodeType.nonLeafNode.expression.rectType;
+        int dimensions = rectArr.currDimensions;
+        int isStatic = 1;
+        for (int i = 0; i < dimensions; i++)
+        {
+            if (rectArr.dimenArray[i][0] == -1 || rectArr.dimenArray[i][1] == -1)
+            {
+                isStatic = 0;
+                break;
+            }
+        }
+        if (isStatic)
+        {
+            table[currentTableEntry].rectArrayType = STATIC;
+        }
+        else
+        {
+            table[currentTableEntry].rectArrayType = DYNAMIC;
+        }
+    }
+    else
+    {
+        table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
+    }
+    table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
+    currentTableEntry++;
 }
 
 void traverseParseTree(TreeNode *root, TypeExprEntry *table)
@@ -336,7 +376,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                     else
                     {
                         primType = PRIM_BOOLEAN;
-                        printf("BOOLEAN TYPE\n");
                     }
                 }
             }
@@ -350,7 +389,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     case rect_array_decl:
     {
         // curr node is rectangular array declaration
-        printf("INSIDE RECT\n");
         root->nodeType.nonLeafNode.type = RECTANGULAR_ARRAY;
         RectangularArray rectArr;
         rectArr.currDimensions = 0;
@@ -383,7 +421,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                         if (term->nodeType.leafNode.terminal == 29)
                         {
                             // idx is a ID
-                            printf("h1\n");
                             checkArrayVariableIsInteger(table, term->nodeType.leafNode.tok->lexeme);
                             rectArr.dimenArray[rectArr.currDimensions][0] = -1;
                         }
@@ -436,29 +473,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         traverseParseTree(declareVarsNode, table);
         break;
     }
-    case rect_array:
-    {
-        // curr node is rect_arr
-        // TreeNode *parent = root->parent;
-        // root->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
-        // RectangularArray rectArr;
-        // rectArr.currDimensions = 0;
-        // traverseParseTree(root->nodeType.nonLeafNode.child, table);
-        break;
-    }
-    case array_dim:
-    {
-        // TreeNode *child = root->nodeType.nonLeafNode.child;
-        // while (child->next != NULL)
-        // {
-        //     if (child->isLeaf == 0)
-        //     {
-        //         if(child)
-        //     }
-        //     child = child->next;
-        // }
-        break;
-    }
     case jagged_array_decl:
     {
         // curr node is jagged arrayd declaration
@@ -478,12 +492,14 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         traverseParseTree(child, table);
         break;
     }
-    case declare_twod_jagged:{
+    case declare_twod_jagged:
+    {
         TreeNode *child = root->nodeType.nonLeafNode.child;
 
         break;
     }
-    case declare_threed_jagged:{
+    case declare_threed_jagged:
+    {
         break;
     }
     case declare_vars:
@@ -493,20 +509,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         if (child->next == NULL)
         {
             // single variable
-            TreeNode *parent = root->parent;
-            TreeNode *IDNode = root->nodeType.nonLeafNode.child;
-            table[currentTableEntry].name = IDNode->nodeType.leafNode.tok->lexeme;
-            table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
-            if (table[currentTableEntry].type == RECTANGULAR_ARRAY)
-            {
-                // To be done
-            }
-            else
-            {
-                table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
-            }
-            table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
-            currentTableEntry++;
+            populateTypeExpressionTable(table, root);
         }
         else
         {
@@ -521,20 +524,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         TreeNode *parent = root->parent; // Parent is declare_vars or var_names_list
         TreeNode *child = root->nodeType.nonLeafNode.child;
 
-        table[currentTableEntry].name = child->nodeType.leafNode.tok->lexeme;
-        table[currentTableEntry].type = parent->nodeType.nonLeafNode.type;
-        if (table->type == RECTANGULAR_ARRAY)
-        {
-            // To be done
-        }
-        else
-        {
-            table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
-        }
-        table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
-        currentTableEntry++;
+        populateTypeExpressionTable(table, root);
 
-        if (child->next != NULL)
+        if (root->next != NULL)
         {
             // next node is var_name_list
             TreeNode *varNameListNode = child->next;

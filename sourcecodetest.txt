@@ -1,6 +1,6 @@
 program ( )
 {
-declare v : boolean ; 
+declare v : real ;
 declare a : array [ v .. 5 ] of integer ;
 a [ 5 ] = 5 ;
 }
