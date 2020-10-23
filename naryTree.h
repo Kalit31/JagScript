@@ -106,18 +106,16 @@ typedef struct RectangularArray
 
 typedef struct TwoDJaggedArray
 {
-    //(4, 7)
-    int r1Low;
-    int r1High;
-    int *r2; //(3, 6, 2, 4, 1, 5)
+    int *size; // store size of each 1D subbarray
+    int x, y; // store state of array while declaration
+    int **r2; //(3, 6, 2, 4, 1, 5)
 } TwoDJaggedArray;
 
 typedef struct ThreeDJaggedArray
 {
-    //(4, 7)
-    int r1Low;
-    int r1High;
-    int **dimen; //3 [ 5, 3, 5] , 2 [ 3, 5], 3 [ 5, 4, 3] ,4 [ 2, 5, 4, 4]
+    int *size; // store size of each 1D subbarray
+    int x, y, z; // store state of array while declaration
+    int ***dimen; //3 [ 5, 3, 5] , 2 [ 3, 5], 3 [ 5, 4, 3] ,4 [ 2, 5, 4, 4]
 } ThreeDJaggedArray;
 
 typedef union JaggedArrayType
@@ -129,6 +127,9 @@ typedef union JaggedArrayType
 typedef struct JaggedArray
 {
     int is2D;
+    //(4, 7)
+    int r1Low;
+    int r1High;
     JaggedArrayType type;
 } JaggedArray;
 
