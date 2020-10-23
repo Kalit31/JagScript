@@ -501,8 +501,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         jaggedArray.is2D = 1;
         jaggedArray.type.twod_array.x=0;
         jaggedArray.type.twod_array.y=0;
-        jaggedArray.type.twod_array.size = malloc(sizeof(int)*(jaggedArray.r1High-jaggedArray.r1Low));
-        jaggedArray.type.twod_array.r2 = (int **)malloc(sizeof(int *)*(jaggedArray.r1High-jaggedArray.r1Low));
+        jaggedArray.type.twod_array.size = malloc(sizeof(int)*(jaggedArray.r1High-jaggedArray.r1Low+1));
+        jaggedArray.type.twod_array.r2 = (int **)malloc(sizeof(int *)*(jaggedArray.r1High-jaggedArray.r1Low+1));
         root->nodeType.nonLeafNode.expression.jaggedType = jaggedArray;
         traverseParseTree(nthChild(root, 12), table);
         root->nodeType.nonLeafNode.expression = nthChild(root, 12)->nodeType.nonLeafNode.expression;
@@ -553,8 +553,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         jaggedArray.type.threed_array.x=0;
         jaggedArray.type.threed_array.y=0;
         jaggedArray.type.threed_array.z=0;
-        jaggedArray.type.threed_array.size = malloc(sizeof(int)*(jaggedArray.r1High-jaggedArray.r1Low));
-        jaggedArray.type.threed_array.dimen = (int ***)malloc(sizeof(int **)*(jaggedArray.r1High-jaggedArray.r1Low));
+        jaggedArray.type.threed_array.sizeR2 = malloc(sizeof(int)*(jaggedArray.r1High-jaggedArray.r1Low+1));
+        jaggedArray.type.threed_array.size = malloc(sizeof(int*)*(jaggedArray.r1High-jaggedArray.r1Low+1));
+        jaggedArray.type.threed_array.dimen = (int ***)malloc(sizeof(int **)*(jaggedArray.r1High-jaggedArray.r1Low+1));
         root->nodeType.nonLeafNode.expression.jaggedType = jaggedArray;
         traverseParseTree(nthChild(root, 14), table);
         root->nodeType.nonLeafNode.expression = nthChild(root, 14)->nodeType.nonLeafNode.expression;
@@ -573,7 +574,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
         JaggedArray jaggArr = root->nodeType.nonLeafNode.expression.jaggedType;
         int size = convertStringToInteger(nthChild(root, 5)->nodeType.leafNode.tok->lexeme);
-        jaggArr.type.threed_array.size[jaggArr.type.threed_array.x] = size;
+        jaggArr.type.threed_array.sizeR2[jaggArr.type.threed_array.x] = size;
+        // TODO: Populate this size array declared below
+        jaggArr.type.threed_array.size[jaggArr.type.threed_array.x] = malloc(sizeof(int)*size);
         jaggArr.type.threed_array.dimen[jaggArr.type.threed_array.x] = malloc(sizeof(int*)*size);
         root->nodeType.nonLeafNode.expression.jaggedType = jaggArr;
         traverseParseTree(nthChild(root, 10), table);
@@ -590,6 +593,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         (jaggArr.type.threed_array.dimen[jaggArr.type.threed_array.x])[jaggArr.type.threed_array.y] = malloc(sizeof(int)*MAX_INT);
         jaggArr.type.threed_array.y++;
         jaggArr.type.threed_array.z=0;
+        jaggArr.type.threed_array.size[jaggArr.type.threed_array.x][jaggArr.type.threed_array.y]=0;
         root->nodeType.nonLeafNode.expression.jaggedType = jaggArr;
         if(nthChild(root, 1)!=NULL) {
             traverseParseTree(nthChild(root, 1), table);
@@ -598,8 +602,19 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         break;
     }
     case list_num:{
-        // TODO: Complete this..and take care of the epsilon thing
+        // TODO: take care of the epsilon thing. Currently, I assume that every subarray has at least 1 element
         // TODO: Maintain count of the size of the third dimension somewhere
+        root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
+        JaggedArray jaggArr = root->nodeType.nonLeafNode.expression.jaggedType;
+        (jaggArr.type.threed_array.dimen[jaggArr.type.threed_array.x])[jaggArr.type.threed_array.y][jaggArr.type.threed_array.z] =
+                convertStringToInteger(nthChild(root, 0)->nodeType.leafNode.tok->lexeme);
+        jaggArr.type.threed_array.z++;
+        jaggArr.type.threed_array.size[jaggArr.type.threed_array.x][jaggArr.type.threed_array.y]++;
+        root->nodeType.nonLeafNode.expression.jaggedType = jaggArr;
+        if(nthChild(root, 1)!=NULL) {
+            traverseParseTree(nthChild(root, 1), table);
+            root->nodeType.nonLeafNode.expression = nthChild(root, 1)->nodeType.nonLeafNode.expression;
+        }
         break;
     }
     case declare_vars:
