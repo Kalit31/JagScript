@@ -46,13 +46,17 @@ int main()
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
+    if (t == NULL)
+    {
+        printf("YES\n");
+    }
     TreeNode *root = t;
-    //preorder(root);
-    //printf("\n");
+    preorder(root);
+    printf("\n");
 
-    TypeExprEntry typeExprTable[MAX];
-    currentTableEntry = 0;
-    traverseParseTree(t, typeExprTable);
+    // TypeExprEntry typeExprTable[MAX];
+    // currentTableEntry = 0;
+    // traverseParseTree(t, typeExprTable);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

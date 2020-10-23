@@ -39,8 +39,8 @@ idx NUM
 assignment_statements assignment assignment_statements
 assignment_statements assignment
 assignment lhs EQUALS rhs SEMICOLON
-lhs ID
 lhs array_ele
+lhs ID
 array_ele ID SBOP list SBCL
 list idx list
 list idx

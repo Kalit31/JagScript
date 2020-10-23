@@ -1,6 +1,7 @@
 program ( )
 {
-declare v : real ;
-declare a : array [ v .. 5 ] of integer ;
-a [ 5 ] = 5 ;
+declare v1 : integer ;
+declare a : jagged array [ 2 .. 3 ] [ ] of integer ;
+R1 [ 2 ] : size 2 : values { 10 ; 20 }
+a [ 2 ] = 5 ; 
 }

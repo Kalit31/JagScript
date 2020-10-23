@@ -16,6 +16,8 @@ int findTerminal(char *s)
             return i;
         }
     }
+
+    printf("COULD NOT FIND TERMINAL\n");
     return -1;
 }
 
@@ -28,6 +30,7 @@ int findNonTerminal(char *s)
             return i;
         }
     }
+    printf("COULD NOT FIND NON TERMINAL\n");
     return -1;
 }
 
@@ -58,164 +61,117 @@ int findLastRuleIndex(int nonTerminalInd, Node *g)
 
 void deleteChildren(TreeNode *node)
 {
+    if (node == NULL)
+    {
+        return;
+    }
+    if (node->isLeaf)
+    {
+        return;
+    }
     TreeNode *child = node->nodeType.nonLeafNode.child;
     while (child != NULL)
     {
         TreeNode *prev = child;
         child = child->next;
-        /*if (prev->isLeaf)
-        {
-            printf("DELETING %s\n", TOKENS[prev->nodeType.leafNode.terminal]);
-        }
-        else
-        {
-            printf("DELETING %s\n", NONTERMINALS[prev->nodeType.nonLeafNode.nonterminal]);
-        }*/
+        deleteChildren(prev);
         free(prev);
     }
     node->nodeType.nonLeafNode.child = NULL;
     return;
 }
 
-int build(TreeNode *curr, Stack *st, Token *s, Node *g)
+Token *globalTokenPtr;
+
+TreeNode *buildNew(TreeNode *t, Node *g)
 {
-    StackNode *t = top(st);
-    if (s == NULL && t == NULL)
+    if (globalTokenPtr == NULL)
     {
-        return 1;
-    }
-    else if (s == NULL || t == NULL)
-    {
-        return 0;
+        return NULL;
     }
 
-    if (t->terminal)
+    if (t->isLeaf)
     {
-        int tokenIdTopStack = t->id;
-        int tokenIdTokenStream = s->tokenName;
-        if (tokenIdTopStack == tokenIdTokenStream)
+        int tokenId = t->nodeType.leafNode.terminal;
+        int tokenIdTokenStream = globalTokenPtr->tokenName;
+        if (tokenId == tokenIdTokenStream)
         {
-            //printf("CURR TREE NODE: %s\n", TOKENS[curr->nodeType.leafNode.terminal]);
-            //printf("POPPING %s\n", TOKENS[tokenIdTopStack]);
-            pop(st);
-            curr->nodeType.leafNode.tok = s;
-            if (curr->next == NULL)
-            {
-                TreeNode *temp = curr->parent;
-                while (temp->next == NULL)
-                {
-                    if (temp->parent == NULL)
-                    {
-                        return 1;
-                    }
-                    temp = temp->parent;
-                }
-                return build(temp->next, st, s->next, g);
-            }
-            return build(curr->next, st, s->next, g);
+            t->nodeType.leafNode.tok = globalTokenPtr;
+            globalTokenPtr = globalTokenPtr->next;
+            return t;
         }
         else
         {
-            //printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
-            return 0;
+
+            return NULL;
         }
     }
-    else
+
+    Token *beforeApplyingRule = globalTokenPtr;
+    int nonTerminalID = t->nodeType.nonLeafNode.nonterminal;
+    int firstRuleNo = findRuleIndex(nonTerminalID, g);
+    int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
+
+    for (int rule = firstRuleNo; rule <= lastRuleNo; rule++)
     {
-        int nonTerminalID = t->id;
+        int possible = 1;
 
-        int firstRuleNo = findRuleIndex(nonTerminalID, g);
-        int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
-        //printf("POPPING %s\n", NONTERMINALS[st->head->val->nodeType.nonLeafNode.nonterminal]);
-        pop(st);
+        Node *r = g[rule].nxt;
 
-        int initialStackSize = st->size;
-        for (int rule = firstRuleNo; rule <= lastRuleNo; rule++)
+        TreeNode *currSibling = NULL;
+
+        while (r != NULL)
         {
-            int rhsSize = g[rule].ruleSize;
-            Node *list[rhsSize];
-
-            int ptrInd = rhsSize - 1;
-            Node *c = g[rule].nxt;
-            for (; ptrInd >= 0; ptrInd--)
+            TreeNode *n;
+            if (r->element[0] >= 65 && r->element[0] <= 90)
             {
-                list[ptrInd] = c;
-                c = c->nxt;
-            }
-
-            TreeNode *childrenList[rhsSize];
-            TreeNode *child = curr->nodeType.nonLeafNode.child;
-            TreeNode *currSibling = child;
-            int ptr = 0;
-            for (int i = rhsSize - 1; i >= 0; i--)
-            {
-                TreeNode *n;
-
-                if (list[i]->element[0] >= 65 && list[i]->element[0] <= 90)
-                {
-                    n = createLeafNode(findTerminal(list[i]->element));
-                }
-                else
-                {
-                    n = createNonLeafNode(findNonTerminal(list[i]->element));
-                }
-                if (child == NULL)
-                {
-                    child = n;
-                    currSibling = n;
-                    currSibling->next = NULL;
-                }
-                else
-                {
-                    currSibling->next = n;
-                    currSibling = currSibling->next;
-                }
-                n->parent = curr;
-                childrenList[ptr] = n;
-                ptr++;
-            }
-            curr->nodeType.nonLeafNode.child = child;
-
-            for (int i = rhsSize - 1; i >= 0; i--)
-            {
-                push(st, childrenList[i]);
-            }
-
-            if (build(child, st, s, g))
-            {
-                curr->nodeType.nonLeafNode.ruleNo = rule;
-                return 1;
+                n = createLeafNode(findTerminal(r->element));
             }
             else
             {
-                // printf("CURR RULE: %d\n", rule);
-                // printf("LAST RULE: %d\n", lastRuleNo);
-                // printf("CURRENT NODE: %s\n", s->lexeme);
-
-                while (st->size > initialStackSize)
-                {
-                    //printf("POPPING IN WHILE LOOP\n");
-                    if (pop(st) == NULL)
-                    {
-                        return 0;
-                    };
-                }
-                deleteChildren(curr);
+                n = createNonLeafNode(findNonTerminal(r->element));
             }
+            n->parent = t;
+            n->next = NULL;
+            if (currSibling == NULL)
+            {
+                t->nodeType.nonLeafNode.child = n;
+            }
+            else
+            {
+                currSibling->next = n;
+            }
+            currSibling = n;
+
+            if (buildNew(n, g) == NULL)
+            {
+                possible = 0;
+                break;
+            }
+            r = r->nxt;
+        }
+        if (possible)
+        {
+            t->nodeType.nonLeafNode.ruleNo = rule;
+            return t;
+        }
+        else
+        {
+            globalTokenPtr = beforeApplyingRule;
+            deleteChildren(t);
         }
     }
-    return 0;
+    return NULL;
 }
 
 TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
 {
-    int error = 0;
-    Stack *st = createStack();
-
     TreeNode *root = initialiseParseTree();
-    push(st, root);
 
-    build(root, st, s, g);
+    globalTokenPtr = s;
+
+    root = buildNew(root, g);
+
     printf("---------PARSING COMPLETED-------------\n");
     return root;
 }
@@ -291,6 +247,44 @@ void populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
     }
     table[currentTableEntry].typeExpr = parent->nodeType.nonLeafNode.expression;
     currentTableEntry++;
+}
+
+void populateParentNodeWithTypeExpression(TreeNode *parent, TypeExprEntry *table, char *lex)
+{
+    int i = 0;
+    for (; i < currentTableEntry; i++)
+    {
+        if (strcmp(table[i].name, lex) == 0)
+        {
+            break;
+        }
+    }
+    parent->nodeType.nonLeafNode.type = table[i].type;
+    parent->nodeType.nonLeafNode.expression = table[i].typeExpr;
+}
+
+void performTypeChecking(TreeNode *parent, TreeNode *operation, TypeExprEntry *table)
+{
+    Terminal op = operation->nodeType.leafNode.terminal;
+    switch (op)
+    {
+    case PLUS:
+    {
+        break;
+    }
+    case MINUS:
+    {
+        break;
+    }
+    case MULT:
+    {
+        break;
+    }
+    case DIV:
+    {
+        break;
+    }
+    }
 }
 
 void traverseParseTree(TreeNode *root, TypeExprEntry *table)
@@ -491,7 +485,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         traverseParseTree(child, table);
         break;
     }
-    case declare_twod_jagged:{
+    case declare_twod_jagged:
+    {
         TreeNode *child = root->nodeType.nonLeafNode.child;
         root->nodeType.nonLeafNode.type = JAGGED_ARRAY;
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
@@ -499,33 +494,36 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         jaggedArray.r1Low = convertStringToInteger(nthChild(root, 4)->nodeType.leafNode.tok->lexeme);
         jaggedArray.r1High = convertStringToInteger(nthChild(root, 6)->nodeType.leafNode.tok->lexeme);
         jaggedArray.is2D = 1;
-        jaggedArray.type.twod_array.x=0;
-        jaggedArray.type.twod_array.y=0;
-        jaggedArray.type.twod_array.size = malloc(sizeof(int)*(jaggedArray.r1High-jaggedArray.r1Low));
-        jaggedArray.type.twod_array.r2 = (int **)malloc(sizeof(int *)*(jaggedArray.r1High-jaggedArray.r1Low));
+        jaggedArray.type.twod_array.x = 0;
+        jaggedArray.type.twod_array.y = 0;
+        jaggedArray.type.twod_array.size = malloc(sizeof(int) * (jaggedArray.r1High - jaggedArray.r1Low));
+        jaggedArray.type.twod_array.r2 = (int **)malloc(sizeof(int *) * (jaggedArray.r1High - jaggedArray.r1Low));
         root->nodeType.nonLeafNode.expression.jaggedType = jaggedArray;
         traverseParseTree(nthChild(root, 12), table);
         break;
     }
-    case twod_jagged_statements:{
+    case twod_jagged_statements:
+    {
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
         traverseParseTree(nthChild(root, 0), table);
         traverseParseTree(nthChild(root, 1), table);
         break;
     }
-    case twod_jagged_statement:{
+    case twod_jagged_statement:
+    {
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
         JaggedArray jaggArr = root->nodeType.nonLeafNode.expression.jaggedType;
         int size = convertStringToInteger(nthChild(root, 5)->nodeType.leafNode.tok->lexeme);
         jaggArr.type.twod_array.size[jaggArr.type.twod_array.x] = size;
-        jaggArr.type.twod_array.r2[jaggArr.type.twod_array.x] = malloc(sizeof(int)*size);
+        jaggArr.type.twod_array.r2[jaggArr.type.twod_array.x] = malloc(sizeof(int) * size);
         root->nodeType.nonLeafNode.expression.jaggedType = jaggArr;
         traverseParseTree(nthChild(root, 10), table);
         root->nodeType.nonLeafNode.expression.jaggedType.type.twod_array.x++;
         traverseParseTree(nthChild(root, 1), table);
         break;
     }
-    case twod_values:{
+    case twod_values:
+    {
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
         JaggedArray jaggArr = root->nodeType.nonLeafNode.expression.jaggedType;
         (jaggArr.type.twod_array.r2[jaggArr.type.twod_array.x])[jaggArr.type.twod_array.y] = convertStringToInteger(nthChild(root, 0)->nodeType.leafNode.tok->lexeme);
@@ -533,7 +531,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         root->nodeType.nonLeafNode.expression.jaggedType = jaggArr;
         break;
     }
-    case declare_threed_jagged:{
+    case declare_threed_jagged:
+    {
         TreeNode *child = root->nodeType.nonLeafNode.child;
         root->nodeType.nonLeafNode.type = JAGGED_ARRAY;
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
@@ -545,18 +544,21 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         traverseParseTree(nthChild(root, 14), table);
         break;
     }
-    case threed_jagged_statements:{
+    case threed_jagged_statements:
+    {
         root->nodeType.nonLeafNode.expression = root->parent->nodeType.nonLeafNode.expression;
         traverseParseTree(nthChild(root, 0), table);
         traverseParseTree(nthChild(root, 1), table);
         traverseParseTree(nthChild(root, 10), table);
         break;
     }
-    case threed_jagged_statement:{
+    case threed_jagged_statement:
+    {
         int size = convertStringToInteger(nthChild(root, 5)->nodeType.leafNode.tok->lexeme);
         break;
     }
-    case threed_values:{
+    case threed_values:
+    {
         break;
     }
     case declare_vars:
@@ -590,6 +592,110 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             varNameListNode->nodeType.nonLeafNode.type = parent->nodeType.nonLeafNode.type;
             varNameListNode->nodeType.nonLeafNode.expression = parent->nodeType.nonLeafNode.expression;
             traverseParseTree(varNameListNode, table);
+        }
+        break;
+    }
+    case assignment_statements:
+    {
+        printf("INSIDE ASSGN STMTS\n");
+        // curr node is assignment statements
+        TreeNode *singleAssignment = root->nodeType.nonLeafNode.child;
+
+        //Traverse single assignment statement
+        traverseParseTree(singleAssignment, table);
+
+        if (singleAssignment->next != NULL)
+        {
+            traverseParseTree(singleAssignment->next, table);
+        }
+        break;
+    }
+    case assignment:
+    {
+        printf("INSIDE ASSGN STMT\n");
+        TreeNode *lhsNode = root->nodeType.nonLeafNode.child;
+
+        //Traverse LHS
+        traverseParseTree(lhsNode, table);
+
+        break;
+    }
+    case lhs:
+    {
+        TreeNode *parent = root->parent;
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+
+        if (child->isLeaf)
+        {
+            // lhs is a single variable
+            printf("SINGLE VAR\n");
+            char *lex = child->nodeType.leafNode.tok->lexeme;
+            TypeExprEntry *tEntry;
+            for (int i = 0; i < currentTableEntry; i++)
+            {
+                if (strcmp(lex, table[i].name) == 0)
+                {
+                    tEntry = &table[i];
+                }
+            }
+            parent->nodeType.nonLeafNode.type = tEntry->type;
+            parent->nodeType.nonLeafNode.expression = tEntry->typeExpr;
+        }
+        else
+        {
+        }
+        break;
+    }
+    case rhs:
+    {
+        TreeNode *child = root->nodeType.nonLeafNode.child;
+        traverseParseTree(child, table);
+        break;
+    }
+    case arithmetic_expr:
+    {
+        TreeNode *arithmeticTerm = root->nodeType.nonLeafNode.child;
+        traverseParseTree(arithmeticTerm, table);
+        if (arithmeticTerm->next == NULL)
+        {
+        }
+        else
+        {
+            // op1 would be either PLUS or MINUS node
+            TreeNode *op1 = arithmeticTerm->next;
+            TreeNode *arithExpr = arithmeticTerm->next->next;
+            traverseParseTree(arithExpr, table);
+            // do type checking for arithTerm and arithExpr
+        }
+        break;
+    }
+    case boolean_expr:
+    {
+        break;
+    }
+    case arithmetic_term:
+    {
+        TreeNode *parent = root->parent;
+        TreeNode *idx = root->nodeType.nonLeafNode.child;
+
+        TreeNode *term = idx->nodeType.nonLeafNode.child;
+        if (term->nodeType.leafNode.terminal == 29)
+        {
+            // idx is a ID
+            populateParentNodeWithTypeExpression(parent, table, term->nodeType.leafNode.tok->lexeme);
+        }
+        else
+        {
+            // idx is a NUM
+        }
+
+        if (idx->next != NULL)
+        {
+            //op2 would be either MULT or DIV node
+            TreeNode *op2 = idx->next;
+            TreeNode *arithTerm = idx->next->next;
+            traverseParseTree(arithTerm, table);
+            //do type checking for idx and arithTerm;
         }
         break;
     }

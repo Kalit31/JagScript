@@ -34,14 +34,14 @@ void push(Stack *st, TreeNode *tn)
     newNode->nxt = st->head;
     st->head = newNode;
     st->size = st->size + 1;
-    /*if (tn->isLeaf)
+    if (tn->isLeaf)
     {
         printf("PUSHING INTO STACK %s\n", TOKENS[tn->nodeType.leafNode.terminal]);
     }
     else
     {
         printf("PUSHING INTO STACK %s\n", NONTERMINALS[tn->nodeType.nonLeafNode.nonterminal]);
-    }*/
+    }
 }
 
 StackNode *pop(Stack *st)
@@ -56,14 +56,14 @@ StackNode *pop(Stack *st)
         StackNode *t = st->head;
         st->head = st->head->nxt;
         st->size = st->size - 1;
-        /*if (t->terminal == 1)
+        if (t->terminal == 1)
         {
             printf("POPPING FROM STACK1 %s\n", TOKENS[t->id]);
         }
         else
         {
             printf("POPPING FROM STACK2 %s\n", NONTERMINALS[t->id]);
-        }*/
+        }
         return t;
     }
 }
