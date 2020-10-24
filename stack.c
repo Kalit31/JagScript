@@ -13,17 +13,7 @@ Stack *createStack()
 StackNode *createStackNode(TreeNode *tn)
 {
     StackNode *node = (StackNode *)malloc(sizeof(StackNode));
-    if (tn->isLeaf)
-    {
-        node->terminal = 1;
-        node->id = tn->terminal;
-    }
-    else
-    {
-        node->terminal = 0;
-        node->id = tn->nonterminal;
-    }
-    // node->val = tn;
+    node->val = tn;
     node->nxt = NULL;
     return node;
 }
@@ -56,13 +46,13 @@ StackNode *pop(Stack *st)
         StackNode *t = st->head;
         st->head = st->head->nxt;
         st->size = st->size - 1;
-        if (t->terminal == 1)
+        if (t->val->isLeaf == 1)
         {
-            printf("POPPING FROM STACK1 %s\n", TOKENS[t->id]);
+            printf("POPPING FROM STACK1 %s\n", TOKENS[t->val->terminal]);
         }
         else
         {
-            printf("POPPING FROM STACK2 %s\n", NONTERMINALS[t->id]);
+            printf("POPPING FROM STACK2 %s\n", NONTERMINALS[t->val->nonterminal]);
         }
         return t;
     }

@@ -84,6 +84,104 @@ void deleteChildren(TreeNode *node)
 
 Token *globalTokenPtr;
 
+int build(TreeNode *curr, Stack *st, Node *g)
+{
+    StackNode *t = top(st);
+    if (globalTokenPtr == NULL && t == NULL)
+    {
+        return 1;
+    }
+    else if (globalTokenPtr == NULL || t == NULL)
+    {
+        return 0;
+    }
+
+    if (t->val->isLeaf)
+    {
+        int tokenIdTopStack = t->val->terminal;
+        int tokenIdTokenStream = globalTokenPtr->tokenName;
+        if (tokenIdTopStack == tokenIdTokenStream)
+        {
+            printf("CURR TREE NODE: %s - %s\n", TOKENS[curr->terminal], globalTokenPtr->lexeme);
+            pop(st);
+            curr->tok = globalTokenPtr;
+            globalTokenPtr = globalTokenPtr->next;
+            return 1;
+        }
+        else
+        {
+            printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
+            return 0;
+        }
+    }
+    else
+    {
+        int nonTerminalID = t->val->nonterminal;
+
+        int firstRuleNo = findRuleIndex(nonTerminalID, g);
+        int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
+        pop(st);
+        Token *beforeApplying = globalTokenPtr;
+        int initialStackSize = st->size;
+        for (int rule = firstRuleNo; rule <= lastRuleNo; rule++)
+        {
+            int possible = 1;
+
+            Node *r = g[rule].nxt;
+            TreeNode *currSibling = NULL;
+
+            while (r != NULL)
+            {
+                TreeNode *n;
+                if (r->element[0] >= 65 && r->element[0] <= 90)
+                {
+                    n = createLeafNode(findTerminal(r->element));
+                }
+                else
+                {
+                    n = createNonLeafNode(findNonTerminal(r->element));
+                }
+                n->parent = t->val;
+                n->next = NULL;
+                if (currSibling == NULL)
+                {
+                    t->val->child = n;
+                }
+                else
+                {
+                    currSibling->next = n;
+                }
+                currSibling = n;
+
+                push(st, n);
+                if (build(n, st, g) == 0)
+                {
+                    possible = 0;
+                    break;
+                }
+                r = r->nxt;
+            }
+
+            if (possible == 1)
+            {
+                curr->ruleNo = rule;
+                return 1;
+            }
+            else
+            {
+                globalTokenPtr = beforeApplying;
+                while (st->size > initialStackSize)
+                {
+                    pop(st);
+                }
+                deleteChildren(curr);
+                printf("TRYING DIFF RULE\n");
+            }
+        }
+    }
+    return 0;
+}
+
 TreeNode *buildNew(TreeNode *t, Node *g)
 {
     if (globalTokenPtr == NULL)
@@ -114,7 +212,7 @@ TreeNode *buildNew(TreeNode *t, Node *g)
     int firstRuleNo = findRuleIndex(nonTerminalID, g);
     int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
 
-    if (nonTerminalID == boolean_expr)
+    if (nonTerminalID == rhs)
     {
         printf("RHS\n");
         printf("FIRST: %d\n", firstRuleNo);
@@ -124,6 +222,10 @@ TreeNode *buildNew(TreeNode *t, Node *g)
 
     for (int rule = firstRuleNo; rule <= lastRuleNo; rule++)
     {
+        if (nonTerminalID == rhs)
+        {
+            printf("RULE: %d\n", rule);
+        }
         int possible = 1;
 
         Node *r = g[rule].nxt;
@@ -166,6 +268,8 @@ TreeNode *buildNew(TreeNode *t, Node *g)
         }
         if (possible)
         {
+            if (rule == 46)
+                printf("CURR TOKEN: %s\n", globalTokenPtr->lexeme);
             t->ruleNo = rule;
             return t;
         }
@@ -180,11 +284,12 @@ TreeNode *buildNew(TreeNode *t, Node *g)
 
 TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
 {
+    Stack *st = createStack();
     TreeNode *root = initialiseParseTree();
-
+    push(st, root);
     globalTokenPtr = s;
-
-    root = buildNew(root, g);
+    build(root, st, g);
+    //root = buildNew(root, g);
     if (root == NULL)
     {
         printf("YES\n");
@@ -277,7 +382,7 @@ void populateNodeWithTypeExpression(TreeNode *node, TypeExprEntry *table, TreeNo
     }
     node->type = table[i].type;
     node->expression = table[i].typeExpr;
-    node->tok = term->tok;
+    node->tok = term->tok; //lexeme : v1, line no : 4
 }
 
 void populateNodeFromNode(TreeNode *a, TreeNode *b)
@@ -351,10 +456,9 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
         }
         else
         {
-
             if (typeExprPrimOfParent == PRIM_BOOLEAN)
             {
-                printf("2 BOOLEAN VARIABLES CANNOT BE ADDED\n");
+                printf("2 BOOLEAN VARIABLES CANNOT BE MULTIPLIED\n");
             }
         }
         break;
@@ -944,7 +1048,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     }
     case idx:
     {
-        TreeNode *term = root->child;
+        TreeNode *term = root->child; // ID Node
         populateNodeWithTypeExpression(root, table, term);
         populateNodeFromNode(root->parent, root);
         break;

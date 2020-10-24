@@ -38,23 +38,21 @@ idx ID
 idx NUM
 assignment_statements assignment assignment_statements
 assignment_statements assignment
-assignment lhs EQUALS rhs SEMICOLON
+assignment lhs EQUALS rhs 
 lhs array_ele
 lhs ID
 array_ele ID SBOP list SBCL
 list idx list
 list idx
-rhs arithmetic_expr
-rhs boolean_expr
+rhs arithmetic_expr SEMICOLON
+rhs boolean_expr SEMICOLON
 arithmetic_expr arithmetic_term op1 arithmetic_expr
 arithmetic_expr arithmetic_term
 arithmetic_term idx op2 arithmetic_term
 arithmetic_term idx 
 op1 PLUS 
 op1 MINUS
+op1 OR
 op2 MULT
 op2 DIV
-boolean_expr boolean_term OR boolean_expr
-boolean_expr boolean_term
-boolean_term ID AND boolean_term
-boolean_term ID
+op2 AND
