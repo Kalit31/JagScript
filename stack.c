@@ -16,12 +16,12 @@ StackNode *createStackNode(TreeNode *tn)
     if (tn->isLeaf)
     {
         node->terminal = 1;
-        node->id = tn->nodeType.leafNode.terminal;
+        node->id = tn->terminal;
     }
     else
     {
         node->terminal = 0;
-        node->id = tn->nodeType.nonLeafNode.nonterminal;
+        node->id = tn->nonterminal;
     }
     // node->val = tn;
     node->nxt = NULL;
@@ -36,11 +36,11 @@ void push(Stack *st, TreeNode *tn)
     st->size = st->size + 1;
     if (tn->isLeaf)
     {
-        printf("PUSHING INTO STACK %s\n", TOKENS[tn->nodeType.leafNode.terminal]);
+        printf("PUSHING INTO STACK %s\n", TOKENS[tn->terminal]);
     }
     else
     {
-        printf("PUSHING INTO STACK %s\n", NONTERMINALS[tn->nodeType.nonLeafNode.nonterminal]);
+        printf("PUSHING INTO STACK %s\n", NONTERMINALS[tn->nonterminal]);
     }
 }
 

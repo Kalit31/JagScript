@@ -107,15 +107,15 @@ typedef struct RectangularArray
 typedef struct TwoDJaggedArray
 {
     int *size; // store size of each 1D subbarray
-    int x, y; // store state of array while declaration
-    int **r2; //(3, 6, 2, 4, 1, 5)
+    int x, y;  // store state of array while declaration
+    int **r2;  //(3, 6, 2, 4, 1, 5)
 } TwoDJaggedArray;
 
 typedef struct ThreeDJaggedArray
 {
     int **size, *sizeR2; // store size of each subbarray
-    int x, y, z; // store state of array while declaration
-    int ***dimen; //3 [ 5, 3, 5] , 2 [ 3, 5], 3 [ 5, 4, 3] ,4 [ 2, 5, 4, 4]
+    int x, y, z;         // store state of array while declaration
+    int ***dimen;        //3 [ 5, 3, 5] , 2 [ 3, 5], 3 [ 5, 4, 3] ,4 [ 2, 5, 4, 4]
 } ThreeDJaggedArray;
 
 typedef union JaggedArrayType
@@ -140,41 +140,29 @@ typedef union TypeExpression
     JaggedArray jaggedType;
 } TypeExpression;
 
-typedef struct treenode TreeNode;
-
-struct nonleafnode
-{
-    NonTerminal nonterminal;
-    int ruleNo;
-    TreeNode *child;
-    Type_Var type;
-    TypeExpression expression;
-};
-typedef struct nonleafnode NonLeafNode;
-
 typedef TokenName Terminal;
-
-struct leafnode
-{
-    Terminal terminal;
-    Token *tok;
-};
-
-typedef struct leafnode LeafNode;
-
-typedef union
-{
-    LeafNode leafNode;
-    NonLeafNode nonLeafNode;
-} NodeType;
 
 struct treenode
 {
+    // Tells whether the node is a leaf(terminal) or non-leaf(non-terminal)
     int isLeaf;
-    NodeType nodeType;
+    // NonTerminal Enum ID
+    NonTerminal nonterminal;
+    // Terminal Enum ID
+    Terminal terminal;
+    // Rule No.
+    int ruleNo;
+    // Variable type -> { PRIM, RECT, JAGGED }. Serves as the tag for union TypeExpression
+    Type_Var type;
+    TypeExpression expression;
+    // Token containing lexeme, line number
+    Token *tok;
+    struct treenode *child;
     struct treenode *parent;
     struct treenode *next; //next node in the same level
 };
+
+typedef struct treenode TreeNode;
 
 // struct parseTree
 // {
@@ -186,9 +174,7 @@ struct treenode
 TreeNode *initialiseParseTree();
 TreeNode *createLeafNode(Terminal terminal);
 TreeNode *createNonLeafNode(NonTerminal nonterminal);
-TreeNode *createNode(int isLeafNode, int enumid, TreeNode *parent);
-void addRuleToParseTree(TreeNode *n);
-TreeNode *nthSibling(TreeNode* child, int n);
-TreeNode *nthChild(TreeNode* root, int n);
+TreeNode *nthSibling(TreeNode *child, int n);
+TreeNode *nthChild(TreeNode *root, int n);
 
 #endif

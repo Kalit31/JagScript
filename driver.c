@@ -15,13 +15,13 @@ void preorder(TreeNode *root)
     }
     if (root->isLeaf)
     {
-        printf("%s ", TOKENS[root->nodeType.leafNode.terminal]);
+        printf("%s ", TOKENS[root->terminal]);
         return;
     }
     else
     {
-        printf("%s ", NONTERMINALS[root->nodeType.nonLeafNode.nonterminal]);
-        TreeNode *child = root->nodeType.nonLeafNode.child;
+        printf("%s ", NONTERMINALS[root->nonterminal]);
+        TreeNode *child = root->child;
         while (child != NULL)
         {
             preorder(child);
@@ -54,9 +54,9 @@ int main()
     preorder(root);
     printf("\n");
 
-    // TypeExprEntry typeExprTable[MAX];
-    // currentTableEntry = 0;
-    // traverseParseTree(t, typeExprTable);
+    TypeExprEntry typeExprTable[MAX];
+    currentTableEntry = 0;
+    traverseParseTree(t, typeExprTable);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
