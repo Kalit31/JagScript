@@ -46,10 +46,6 @@ int main()
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
-    if (t == NULL)
-    {
-        printf("YES\n");
-    }
     TreeNode *root = t;
     preorder(root);
     printf("\n");
