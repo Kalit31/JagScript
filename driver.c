@@ -55,9 +55,9 @@ int main()
     preorder(root);
     printf("\n");
 
-    // TypeExprEntry typeExprTable[MAX];
-    // currentTableEntry = 0;
-    // traverseParseTree(t, typeExprTable);
+    TypeExprEntry typeExprTable[MAX];
+    currentTableEntry = 0;
+    traverseParseTree(t, typeExprTable);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

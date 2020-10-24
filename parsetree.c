@@ -102,7 +102,7 @@ int build(TreeNode *curr, Stack *st, Node *g)
         int tokenIdTokenStream = globalTokenPtr->tokenName;
         if (tokenIdTopStack == tokenIdTokenStream)
         {
-            printf("CURR TREE NODE: %s - %s\n", TOKENS[curr->terminal], globalTokenPtr->lexeme);
+            //printf("CURR TREE NODE: %s - %s\n", TOKENS[curr->terminal], globalTokenPtr->lexeme);
             pop(st);
             curr->tok = globalTokenPtr;
             globalTokenPtr = globalTokenPtr->next;
@@ -110,7 +110,7 @@ int build(TreeNode *curr, Stack *st, Node *g)
         }
         else
         {
-            printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
+            //printf("Could not match %s with %s\n", TOKENS[tokenIdTopStack], TOKENS[tokenIdTokenStream]);
             return 0;
         }
     }
@@ -175,7 +175,7 @@ int build(TreeNode *curr, Stack *st, Node *g)
                     pop(st);
                 }
                 deleteChildren(curr);
-                printf("TRYING DIFF RULE\n");
+                //printf("TRYING DIFF RULE\n");
             }
         }
     }
@@ -290,10 +290,6 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     globalTokenPtr = s;
     build(root, st, g);
     //root = buildNew(root, g);
-    if (root == NULL)
-    {
-        printf("YES\n");
-    }
     printf("---------PARSING COMPLETED-------------\n");
     return root;
 }
@@ -390,10 +386,6 @@ void populateNodeFromNode(TreeNode *a, TreeNode *b)
     a->type = b->type;
     a->expression = b->expression;
     a->tok = b->tok;
-    if (strcmp(a->tok->lexeme, "v2"))
-    {
-        printf("YES\n");
-    }
 }
 
 void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator)
@@ -490,12 +482,32 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
     }
     case OR:
     {
-        printf("INSIDE OR\n");
+        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
+        {
+            printTypeCheckError(root, rightExpr, op);
+        }
+        else
+        {
+            if (typeExprPrimOfParent == PRIM_INTEGER || typeExprPrimOfParent == PRIM_REAL)
+            {
+                printf("OR CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES\n");
+            }
+        }
         break;
     }
     case AND:
     {
-        printf("INSIDE AND\n");
+        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
+        {
+            printTypeCheckError(root, rightExpr, op);
+        }
+        else
+        {
+            if (typeExprPrimOfParent == PRIM_INTEGER || typeExprPrimOfParent == PRIM_REAL)
+            {
+                printf("AND CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES\n");
+            }
+        }
         break;
     }
     }
@@ -959,35 +971,13 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         else
         {
-            // op1 would be either PLUS or MINUS node
+            // op1 would be either PLUS or MINUS or OR node
             TreeNode *op1 = arithmeticTerm->next;
             TreeNode *arithExpr = op1->next;
             traverseParseTree(arithExpr, table);
 
             // do type checking for arithTerm and arithExpr
             performTypeChecking(root, arithExpr, op1->child, table);
-        }
-        break;
-    }
-    case boolean_expr:
-    {
-        // curr node is boolean exression
-        TreeNode *booleanTerm = root->child;
-        traverseParseTree(booleanTerm, table);
-        populateNodeFromNode(root, booleanTerm);
-
-        if (booleanTerm->next == NULL)
-        {
-        }
-        else
-        {
-            // op1 would be OR
-            TreeNode *op1 = booleanTerm->next;
-            TreeNode *boolExpr = op1->next;
-            traverseParseTree(boolExpr, table);
-
-            // do type checking for boolTerm and boolExpr
-            performTypeChecking(root, boolExpr, op1->child, table);
         }
         break;
     }
@@ -1014,34 +1004,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             traverseParseTree(arithTerm, table);
             //do type checking for idx and arithTerm;
             performTypeChecking(root, arithTerm, op2->child, table);
-            populateNodeFromNode(parent, root);
-        }
-        break;
-    }
-    case boolean_term:
-    {
-        // parent is bool_expr or bool_term
-        TreeNode *parent = root->parent;
-        TreeNode *id = root->child;
-
-        populateNodeWithTypeExpression(root, table, id);
-
-        if (id->next == NULL)
-        {
-            if (parent->child == root)
-            {
-                populateNodeFromNode(parent, root);
-            }
-        }
-
-        if (id->next != NULL)
-        {
-            //op2 would be AND
-            TreeNode *op2 = id->next;
-            TreeNode *boolTerm = op2->next;
-            traverseParseTree(boolTerm, table);
-            //do type checking for idx and arithTerm;
-            performTypeChecking(root, boolTerm, op2->child, table);
             populateNodeFromNode(parent, root);
         }
         break;
