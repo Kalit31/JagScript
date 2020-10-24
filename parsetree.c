@@ -43,6 +43,7 @@ int findRuleIndex(int nonTerminalInd, Node *g)
             return i;
         }
     }
+    printf("COULD NOT FIND RULE\n");
     return -1;
 }
 
@@ -92,6 +93,7 @@ TreeNode *buildNew(TreeNode *t, Node *g)
 
     if (t->isLeaf)
     {
+
         int tokenId = t->terminal;
         int tokenIdTokenStream = globalTokenPtr->tokenName;
         if (tokenId == tokenIdTokenStream)
@@ -111,6 +113,14 @@ TreeNode *buildNew(TreeNode *t, Node *g)
     int nonTerminalID = t->nonterminal;
     int firstRuleNo = findRuleIndex(nonTerminalID, g);
     int lastRuleNo = findLastRuleIndex(nonTerminalID, g);
+
+    if (nonTerminalID == boolean_expr)
+    {
+        printf("RHS\n");
+        printf("FIRST: %d\n", firstRuleNo);
+        printf("LAST: %d\n", lastRuleNo);
+        printf("TOKEN: %s\n", globalTokenPtr->lexeme);
+    }
 
     for (int rule = firstRuleNo; rule <= lastRuleNo; rule++)
     {
@@ -145,6 +155,10 @@ TreeNode *buildNew(TreeNode *t, Node *g)
 
             if (buildNew(n, g) == NULL)
             {
+                if (rule == 40)
+                {
+                    printf("RULE %d\n", rule);
+                }
                 possible = 0;
                 break;
             }
@@ -171,7 +185,10 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     globalTokenPtr = s;
 
     root = buildNew(root, g);
-
+    if (root == NULL)
+    {
+        printf("YES\n");
+    }
     printf("---------PARSING COMPLETED-------------\n");
     return root;
 }
@@ -365,6 +382,16 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
         {
             printTypeCheckError(root, rightExpr, op);
         }
+        break;
+    }
+    case OR:
+    {
+        printf("INSIDE OR\n");
+        break;
+    }
+    case AND:
+    {
+        printf("INSIDE AND\n");
         break;
     }
     }
@@ -810,7 +837,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     case rhs:
     {
         // curr node is rhs
-        // child is arithmetic expression
+        // child is arithmetic expression or boolean expression
         TreeNode *child = root->child;
         traverseParseTree(child, table);
         populateNodeFromNode(root, child);
@@ -840,6 +867,24 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     }
     case boolean_expr:
     {
+        // curr node is boolean exression
+        TreeNode *booleanTerm = root->child;
+        traverseParseTree(booleanTerm, table);
+        populateNodeFromNode(root, booleanTerm);
+
+        if (booleanTerm->next == NULL)
+        {
+        }
+        else
+        {
+            // op1 would be OR
+            TreeNode *op1 = booleanTerm->next;
+            TreeNode *boolExpr = op1->next;
+            traverseParseTree(boolExpr, table);
+
+            // do type checking for boolTerm and boolExpr
+            performTypeChecking(root, boolExpr, op1->child, table);
+        }
         break;
     }
     case arithmetic_term:
@@ -865,6 +910,34 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             traverseParseTree(arithTerm, table);
             //do type checking for idx and arithTerm;
             performTypeChecking(root, arithTerm, op2->child, table);
+            populateNodeFromNode(parent, root);
+        }
+        break;
+    }
+    case boolean_term:
+    {
+        // parent is bool_expr or bool_term
+        TreeNode *parent = root->parent;
+        TreeNode *id = root->child;
+
+        populateNodeWithTypeExpression(root, table, id);
+
+        if (id->next == NULL)
+        {
+            if (parent->child == root)
+            {
+                populateNodeFromNode(parent, root);
+            }
+        }
+
+        if (id->next != NULL)
+        {
+            //op2 would be AND
+            TreeNode *op2 = id->next;
+            TreeNode *boolTerm = op2->next;
+            traverseParseTree(boolTerm, table);
+            //do type checking for idx and arithTerm;
+            performTypeChecking(root, boolTerm, op2->child, table);
             populateNodeFromNode(parent, root);
         }
         break;

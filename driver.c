@@ -41,7 +41,12 @@ int main()
 
     Token *ts = NULL;
     ts = tokeniseSourcecode("sourcecodetest.txt", ts);
-
+    // Token *temp = ts;
+    // while (ts != NULL)
+    // {
+    //     printf("%s\n", TOKENS[ts->tokenName]);
+    //     ts = ts->next;
+    // }
     printf("-------------TOKENISING SOURCE CODE COMPLETED-------------\n");
 
     TreeNode *t = NULL;
@@ -50,9 +55,9 @@ int main()
     preorder(root);
     printf("\n");
 
-    TypeExprEntry typeExprTable[MAX];
-    currentTableEntry = 0;
-    traverseParseTree(t, typeExprTable);
+    // TypeExprEntry typeExprTable[MAX];
+    // currentTableEntry = 0;
+    // traverseParseTree(t, typeExprTable);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

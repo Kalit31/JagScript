@@ -1,6 +1,5 @@
 program ( )
 {
-declare list of variables v2 v3 : integer ;
-declare v1 : real ;
-v1 = v2  ;
+declare list of variables v1 v2 v3 : boolean ;
+v1 = v2 &&& v3 ;
 }

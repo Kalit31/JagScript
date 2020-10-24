@@ -2,8 +2,8 @@
 #define NARYTREE
 
 #include "token.h"
-#define NUM_NON_TERMINALS 36
-#define NUM_RULES 62
+#define NUM_NON_TERMINALS 35
+#define NUM_RULES 60
 #define MAX_DIMENSIONS 10
 
 static char *NONTERMINALS[NUM_NON_TERMINALS] = {
@@ -42,7 +42,7 @@ static char *NONTERMINALS[NUM_NON_TERMINALS] = {
     "op1",
     "op2",
     "boolean_term",
-    "boolean_factor"};
+};
 
 typedef enum NonTerminal
 {
@@ -81,7 +81,6 @@ typedef enum NonTerminal
     op1,
     op2,
     boolean_term,
-    boolean_factor
 } NonTerminal;
 
 typedef enum Type_Var

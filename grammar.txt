@@ -56,7 +56,5 @@ op2 MULT
 op2 DIV
 boolean_expr boolean_term OR boolean_expr
 boolean_expr boolean_term
-boolean_term boolean_factor AND boolean_term
-boolean_term boolean_factor
-boolean_factor BOOLEAN
-boolean_factor ID
+boolean_term ID AND boolean_term
+boolean_term ID
