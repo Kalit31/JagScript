@@ -400,6 +400,66 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator)
     printf("TYPE OF FIRST OPERAND: %d\n", b->expression.primitiveType);
 }
 
+void checkArrayCompatibility(TreeNode *node1, TreeNode *node2){
+    // Check if both arrays are of same dimensions
+    if(node1->type == node2->type){
+        if(node1->type == RECTANGULAR_ARRAY){
+            if(node1->expression.rectType.currDimensions!=node2->expression.rectType.currDimensions){
+                // Raise incompatibility error
+            } else {
+                int curDimensions = node1->expression.rectType.currDimensions;
+                while(curDimensions--){
+                    if(node1->expression.rectType.dimenArray[curDimensions][0]!=node2->expression.rectType.dimenArray[curDimensions][0] ||
+                        node1->expression.rectType.dimenArray[curDimensions][1]!=node2->expression.rectType.dimenArray[curDimensions][1]){
+                        // Dimensions incompatible
+                    }
+                }
+            }
+        } else if(node1->type == JAGGED_ARRAY){
+            if(node1->expression.jaggedType.is2D!=node2->expression.jaggedType.is2D){
+                // Raise error... Array types not compatible
+            } else {
+                if(node1->expression.jaggedType.r1Low!=node2->expression.jaggedType.r1Low ||
+                    node1->expression.jaggedType.r1High!=node2->expression.jaggedType.r1High){
+                    // Incompatible dimensions
+                }
+                if (node1->expression.jaggedType.is2D) {
+                    // 2D Jagged Array
+                    for(int i=0; i<node1->expression.jaggedType.r1High-node1->expression.jaggedType.r1Low+1; i++){
+                        if(node1->expression.jaggedType.type.twod_array.size[i]!=node2->expression.jaggedType.type.twod_array.size[i]){
+                            // Array dimensions incompatible
+                        }
+                    }
+                } else {
+                    // 3D Jagged Array
+                    // Check compatibility for 2nd dimension
+                    int incomaptibilityFlag2ndDim=0;
+                    for(int i=0; i<node1->expression.jaggedType.r1High-node1->expression.jaggedType.r1Low+1; i++){
+                        if(node1->expression.jaggedType.type.threed_array.sizeR2[i]!=node2->expression.jaggedType.type.threed_array.sizeR2[i]){
+                            // Array dimensions incompatible
+                            incomaptibilityFlag2ndDim=1;
+                        }
+                    }
+                    // check compatibility for 3rd dimension
+                    if(!incomaptibilityFlag2ndDim) {
+                        for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++) {
+                            for (int j=0; j<node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++) {
+                                // Array dimensions incompatible
+                                if(node1->expression.jaggedType.type.threed_array.size[i][j]!=node2->expression.jaggedType.type.threed_array.size[i][j]){
+                                    // Array dimensions incompatible
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        // Raise error... Array types not compatible
+        // I assume that rectangular arrays aren't compatible with jagged arrays even if they are of same size
+    }
+}
+
 void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operation, TypeExprEntry *table)
 {
     Terminal op = operation->terminal;
@@ -947,7 +1007,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         else
         {
             // lhs is array element
-            traverseParseTree(child, table); //todo
+            traverseParseTree(child, table);
         }
         break;
     }
@@ -1027,7 +1087,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 tEntry = &table[i];
             }
         }
-
+        if(tEntry->rectArrayType==DYNAMIC){
+            // Raise error as per pg 11, last paragraph
+        }
         TreeNode *child = nthChild(root, 2)->child; //list
 
         if(tEntry->type == RECTANGULAR_ARRAY){
@@ -1089,7 +1151,10 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 }
             }
         }
-        break;//TODO
+        root->type = PRIMITIVE; //Proxy for array element
+        root->expression.primitiveType = PRIM_INTEGER;
+        populateNodeFromNode(root->parent, root);
+        break;
     }
     default:
     {
