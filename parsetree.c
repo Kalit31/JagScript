@@ -947,6 +947,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         else
         {
             // lhs is array element
+            traverseParseTree(child, table); //todo
         }
         break;
     }
@@ -1014,6 +1015,85 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         populateNodeWithTypeExpression(root, table, term);
         populateNodeFromNode(root->parent, root);
         break;
+    }
+    case array_ele:
+    {
+        char *lex = root->child->tok->lexeme;
+        TypeExprEntry *tEntry;
+        for (int i = 0; i < currentTableEntry; i++)
+        {
+            if (strcmp(lex, table[i].name) == 0)
+            {
+                tEntry = &table[i];
+            }
+        }
+
+        TreeNode *child = nthChild(root, 2)->child; //list
+
+        if(tEntry->type == RECTANGULAR_ARRAY){
+            int i = root->expression.rectType.currDimensions;
+            while (1) {
+                i--;
+                if (child->child->terminal == ID) {
+                    //Raise error as per pg 11
+                    break;
+                } else {
+                    // It is a Num
+                    int idx = convertStringToInteger(child->child->tok->lexeme);
+                    if (idx > root->expression.rectType.dimenArray[i][1] ||
+                        idx < root->expression.rectType.dimenArray[i][0]) {
+                        // Index out of Bounds...Raise Error
+                    }
+                    if (child->next != NULL) child = child->next->child;
+                    else break;
+                }
+            }
+            if (i != 0) {
+                // Error BC!!
+            }
+        } else if(tEntry->type ==  JAGGED_ARRAY && tEntry->typeExpr.jaggedType.is2D){
+            if(child->next==NULL || child->next->child->next==NULL){
+                // Error...More dimensions supplied than acceptable by 2d jagged array
+            }
+            if(child->child->terminal == ID || child->next->child->child->terminal==ID){
+                // Error
+                break;
+            }
+            else{
+                int x1=convertStringToInteger(child->child->tok->lexeme);
+                int x2=convertStringToInteger(child->next->child->child->tok->lexeme);
+                if(x1>tEntry->typeExpr.jaggedType.r1High || x1<tEntry->typeExpr.jaggedType.r1Low){
+                    // 1st dimension out of bounds
+                }else if(x2>tEntry->typeExpr.jaggedType.type.twod_array.size[x1-tEntry->typeExpr.jaggedType.r1Low] || x2<1){
+                    // 2nd dimension out of bounds
+                }
+            }
+        } else if(tEntry->type == JAGGED_ARRAY && !tEntry->typeExpr.jaggedType.is2D){
+            if(child->next==NULL || child->next->child->next==NULL || child->next->child->next->child->next==NULL){
+                // Error...More dimensions supplied than acceptable by 2d jagged array
+            }
+            if(child->child->terminal == ID || child->next->child->child->terminal==ID){
+                // Error
+                break;
+            }
+            else{
+                int x1=convertStringToInteger(child->child->tok->lexeme);
+                int x2=convertStringToInteger(child->next->child->child->tok->lexeme);
+                int x3=convertStringToInteger(child->next->child->next->child->child->tok->lexeme);
+                if(x1>tEntry->typeExpr.jaggedType.r1High || x1<tEntry->typeExpr.jaggedType.r1Low){
+                    // 1st dimension out of bounds
+                } else if(x2>tEntry->typeExpr.jaggedType.type.threed_array.sizeR2[x1-tEntry->typeExpr.jaggedType.r1Low] || x2<1){
+                    // 2nd dimension out of bounds
+                } else if(x3>tEntry->typeExpr.jaggedType.type.threed_array.size[x1-tEntry->typeExpr.jaggedType.r1Low][x2-1] || x3<1){
+                    // 3rd dimension out of bounds
+                }
+            }
+        }
+        break;//TODO
+    }
+    default:
+    {
+        printf("You shouldn't be here\n");
     }
     }
 }
