@@ -4,6 +4,8 @@
 #include "ReadGrammar.c"
 #include "tokenizer.c"
 #include "parsetree.c"
+#include "printParseTree.c"
+#include "printTypeExpressionTable.c"
 //Max to be fixed.
 #define MAX 1000
 
@@ -41,23 +43,17 @@ int main()
 
     Token *ts = NULL;
     ts = tokeniseSourcecode("sourcecodetest.txt", ts);
-    // Token *temp = ts;
-    // while (ts != NULL)
-    // {
-    //     printf("%s\n", TOKENS[ts->tokenName]);
-    //     ts = ts->next;
-    // }
     printf("-------------TOKENISING SOURCE CODE COMPLETED-------------\n");
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
-    TreeNode *root = t;
-    preorder(root);
-    printf("\n");
+    printParseTree(t);
 
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;
     traverseParseTree(t, typeExprTable);
+
+    printTypeExpressionTable(typeExprTable, currentTableEntry);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

@@ -11,9 +11,13 @@ typedef enum Rect_Array_Type
 
 struct typeexprentry
 {
+    //Field1
     char *name;
+    //Field2
     Type_Var type;
+    //Field3
     Rect_Array_Type rectArrayType;
+    //Field4
     TypeExpression typeExpr;
 };
 

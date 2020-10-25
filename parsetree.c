@@ -99,6 +99,10 @@ int build(TreeNode *curr, Stack *st, Node *g)
     if (t->val->isLeaf)
     {
         int tokenIdTopStack = t->val->terminal;
+        if (tokenIdTopStack == EPS)
+        {
+            return 1;
+        }
         int tokenIdTokenStream = globalTokenPtr->tokenName;
         if (tokenIdTopStack == tokenIdTokenStream)
         {
@@ -400,52 +404,77 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator)
     printf("TYPE OF FIRST OPERAND: %d\n", b->expression.primitiveType);
 }
 
-void checkArrayCompatibility(TreeNode *node1, TreeNode *node2){
+void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
+{
     // Check if both arrays are of same dimensions
-    if(node1->type == node2->type){
-        if(node1->type == RECTANGULAR_ARRAY){
-            if(node1->expression.rectType.currDimensions!=node2->expression.rectType.currDimensions){
+    if (node1->type == node2->type)
+    {
+        if (node1->type == RECTANGULAR_ARRAY)
+        {
+            if (node1->expression.rectType.currDimensions != node2->expression.rectType.currDimensions)
+            {
                 // Raise incompatibility error
-            } else {
+            }
+            else
+            {
                 int curDimensions = node1->expression.rectType.currDimensions;
-                while(curDimensions--){
-                    if(node1->expression.rectType.dimenArray[curDimensions][0]!=node2->expression.rectType.dimenArray[curDimensions][0] ||
-                        node1->expression.rectType.dimenArray[curDimensions][1]!=node2->expression.rectType.dimenArray[curDimensions][1]){
+                while (curDimensions--)
+                {
+                    if (node1->expression.rectType.dimenArray[curDimensions][0] != node2->expression.rectType.dimenArray[curDimensions][0] ||
+                        node1->expression.rectType.dimenArray[curDimensions][1] != node2->expression.rectType.dimenArray[curDimensions][1])
+                    {
                         // Dimensions incompatible
                     }
                 }
             }
-        } else if(node1->type == JAGGED_ARRAY){
-            if(node1->expression.jaggedType.is2D!=node2->expression.jaggedType.is2D){
+        }
+        else if (node1->type == JAGGED_ARRAY)
+        {
+            if (node1->expression.jaggedType.is2D != node2->expression.jaggedType.is2D)
+            {
                 // Raise error... Array types not compatible
-            } else {
-                if(node1->expression.jaggedType.r1Low!=node2->expression.jaggedType.r1Low ||
-                    node1->expression.jaggedType.r1High!=node2->expression.jaggedType.r1High){
+            }
+            else
+            {
+                if (node1->expression.jaggedType.r1Low != node2->expression.jaggedType.r1Low ||
+                    node1->expression.jaggedType.r1High != node2->expression.jaggedType.r1High)
+                {
                     // Incompatible dimensions
                 }
-                if (node1->expression.jaggedType.is2D) {
+                if (node1->expression.jaggedType.is2D)
+                {
                     // 2D Jagged Array
-                    for(int i=0; i<node1->expression.jaggedType.r1High-node1->expression.jaggedType.r1Low+1; i++){
-                        if(node1->expression.jaggedType.type.twod_array.size[i]!=node2->expression.jaggedType.type.twod_array.size[i]){
+                    for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++)
+                    {
+                        if (node1->expression.jaggedType.type.twod_array.size[i] != node2->expression.jaggedType.type.twod_array.size[i])
+                        {
                             // Array dimensions incompatible
                         }
                     }
-                } else {
+                }
+                else
+                {
                     // 3D Jagged Array
                     // Check compatibility for 2nd dimension
-                    int incomaptibilityFlag2ndDim=0;
-                    for(int i=0; i<node1->expression.jaggedType.r1High-node1->expression.jaggedType.r1Low+1; i++){
-                        if(node1->expression.jaggedType.type.threed_array.sizeR2[i]!=node2->expression.jaggedType.type.threed_array.sizeR2[i]){
+                    int incomaptibilityFlag2ndDim = 0;
+                    for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++)
+                    {
+                        if (node1->expression.jaggedType.type.threed_array.sizeR2[i] != node2->expression.jaggedType.type.threed_array.sizeR2[i])
+                        {
                             // Array dimensions incompatible
-                            incomaptibilityFlag2ndDim=1;
+                            incomaptibilityFlag2ndDim = 1;
                         }
                     }
                     // check compatibility for 3rd dimension
-                    if(!incomaptibilityFlag2ndDim) {
-                        for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++) {
-                            for (int j=0; j<node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++) {
+                    if (!incomaptibilityFlag2ndDim)
+                    {
+                        for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++)
+                        {
+                            for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++)
+                            {
                                 // Array dimensions incompatible
-                                if(node1->expression.jaggedType.type.threed_array.size[i][j]!=node2->expression.jaggedType.type.threed_array.size[i][j]){
+                                if (node1->expression.jaggedType.type.threed_array.size[i][j] != node2->expression.jaggedType.type.threed_array.size[i][j])
+                                {
                                     // Array dimensions incompatible
                                 }
                             }
@@ -454,7 +483,9 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2){
                 }
             }
         }
-    } else {
+    }
+    else
+    {
         // Raise error... Array types not compatible
         // I assume that rectangular arrays aren't compatible with jagged arrays even if they are of same size
     }
@@ -1087,66 +1118,94 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 tEntry = &table[i];
             }
         }
-        if(tEntry->rectArrayType==DYNAMIC){
+        if (tEntry->rectArrayType == DYNAMIC)
+        {
             // Raise error as per pg 11, last paragraph
         }
         TreeNode *child = nthChild(root, 2)->child; //list
 
-        if(tEntry->type == RECTANGULAR_ARRAY){
+        if (tEntry->type == RECTANGULAR_ARRAY)
+        {
             int i = root->expression.rectType.currDimensions;
-            while (1) {
+            while (1)
+            {
                 i--;
-                if (child->child->terminal == ID) {
+                if (child->child->terminal == ID)
+                {
                     //Raise error as per pg 11
                     break;
-                } else {
+                }
+                else
+                {
                     // It is a Num
                     int idx = convertStringToInteger(child->child->tok->lexeme);
                     if (idx > root->expression.rectType.dimenArray[i][1] ||
-                        idx < root->expression.rectType.dimenArray[i][0]) {
+                        idx < root->expression.rectType.dimenArray[i][0])
+                    {
                         // Index out of Bounds...Raise Error
                     }
-                    if (child->next != NULL) child = child->next->child;
-                    else break;
+                    if (child->next != NULL)
+                        child = child->next->child;
+                    else
+                        break;
                 }
             }
-            if (i != 0) {
+            if (i != 0)
+            {
                 // Error BC!!
             }
-        } else if(tEntry->type ==  JAGGED_ARRAY && tEntry->typeExpr.jaggedType.is2D){
-            if(child->next==NULL || child->next->child->next==NULL){
+        }
+        else if (tEntry->type == JAGGED_ARRAY && tEntry->typeExpr.jaggedType.is2D)
+        {
+            if (child->next == NULL || child->next->child->next == NULL)
+            {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
             }
-            if(child->child->terminal == ID || child->next->child->child->terminal==ID){
+            if (child->child->terminal == ID || child->next->child->child->terminal == ID)
+            {
                 // Error
                 break;
             }
-            else{
-                int x1=convertStringToInteger(child->child->tok->lexeme);
-                int x2=convertStringToInteger(child->next->child->child->tok->lexeme);
-                if(x1>tEntry->typeExpr.jaggedType.r1High || x1<tEntry->typeExpr.jaggedType.r1Low){
+            else
+            {
+                int x1 = convertStringToInteger(child->child->tok->lexeme);
+                int x2 = convertStringToInteger(child->next->child->child->tok->lexeme);
+                if (x1 > tEntry->typeExpr.jaggedType.r1High || x1 < tEntry->typeExpr.jaggedType.r1Low)
+                {
                     // 1st dimension out of bounds
-                }else if(x2>tEntry->typeExpr.jaggedType.type.twod_array.size[x1-tEntry->typeExpr.jaggedType.r1Low] || x2<1){
+                }
+                else if (x2 > tEntry->typeExpr.jaggedType.type.twod_array.size[x1 - tEntry->typeExpr.jaggedType.r1Low] || x2 < 1)
+                {
                     // 2nd dimension out of bounds
                 }
             }
-        } else if(tEntry->type == JAGGED_ARRAY && !tEntry->typeExpr.jaggedType.is2D){
-            if(child->next==NULL || child->next->child->next==NULL || child->next->child->next->child->next==NULL){
+        }
+        else if (tEntry->type == JAGGED_ARRAY && !tEntry->typeExpr.jaggedType.is2D)
+        {
+            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next == NULL)
+            {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
             }
-            if(child->child->terminal == ID || child->next->child->child->terminal==ID){
+            if (child->child->terminal == ID || child->next->child->child->terminal == ID)
+            {
                 // Error
                 break;
             }
-            else{
-                int x1=convertStringToInteger(child->child->tok->lexeme);
-                int x2=convertStringToInteger(child->next->child->child->tok->lexeme);
-                int x3=convertStringToInteger(child->next->child->next->child->child->tok->lexeme);
-                if(x1>tEntry->typeExpr.jaggedType.r1High || x1<tEntry->typeExpr.jaggedType.r1Low){
+            else
+            {
+                int x1 = convertStringToInteger(child->child->tok->lexeme);
+                int x2 = convertStringToInteger(child->next->child->child->tok->lexeme);
+                int x3 = convertStringToInteger(child->next->child->next->child->child->tok->lexeme);
+                if (x1 > tEntry->typeExpr.jaggedType.r1High || x1 < tEntry->typeExpr.jaggedType.r1Low)
+                {
                     // 1st dimension out of bounds
-                } else if(x2>tEntry->typeExpr.jaggedType.type.threed_array.sizeR2[x1-tEntry->typeExpr.jaggedType.r1Low] || x2<1){
+                }
+                else if (x2 > tEntry->typeExpr.jaggedType.type.threed_array.sizeR2[x1 - tEntry->typeExpr.jaggedType.r1Low] || x2 < 1)
+                {
                     // 2nd dimension out of bounds
-                } else if(x3>tEntry->typeExpr.jaggedType.type.threed_array.size[x1-tEntry->typeExpr.jaggedType.r1Low][x2-1] || x3<1){
+                }
+                else if (x3 > tEntry->typeExpr.jaggedType.type.threed_array.size[x1 - tEntry->typeExpr.jaggedType.r1Low][x2 - 1] || x3 < 1)
+                {
                     // 3rd dimension out of bounds
                 }
             }

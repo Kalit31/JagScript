@@ -33,7 +33,7 @@ threed_jagged_statement R SBOP NUM SBCL COLON SIZE NUM COLON VALUES CBOP threed_
 threed_values list_num SEMICOLON threed_values
 threed_values list_num
 list_num NUM list_num
-list_num NUM
+list_num EPS
 idx ID 
 idx NUM
 assignment_statements assignment assignment_statements

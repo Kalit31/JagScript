@@ -1,7 +1,7 @@
 #ifndef LEX_DEF_
 #define LEX_DEF_
 
-#define NUM_TOKENS 32
+#define NUM_TOKENS 33
 
 static char *TOKENS[NUM_TOKENS] = {
     "PROGRAM",
@@ -35,6 +35,7 @@ static char *TOKENS[NUM_TOKENS] = {
     "EQUALS",
     "ID",
     "NUM",
+    "EPS"
     "ERR"};
 
 typedef enum TokenName
@@ -71,6 +72,7 @@ typedef enum TokenName
     EQUALS,
     ID,
     NUM,
+    EPS,
     ERR
 } TokenName;
 

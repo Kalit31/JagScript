@@ -1,6 +1,5 @@
 program ( )
 {
 declare v2 : integer ;
-declare list of variables v1 v3 : boolean ;
-v1 = v2 &&& v3 ;
+v2 = 5 ;
 }
