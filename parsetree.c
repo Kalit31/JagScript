@@ -408,10 +408,10 @@ void populateNodeFromNode(TreeNode *a, TreeNode *b)
     a->tok = b->tok;
 }
 
-void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator)
+void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * message)
 {
-    printf(ANSI_COLOR_RED  "%d\t\t\tASSIGNMENT %20s %20s %12d %20s %12d" ANSI_COLOR_RESET "\n", a->tok->lineNo,TOKENS[operator],a->tok->lexeme
-    ,a->expression.primitiveType, b->tok->lexeme, b->expression.primitiveType);
+    printf(ANSI_COLOR_RED  "%d\t\t\tASSIGNMENT %20s %20s %12d %20s %12d %20s" ANSI_COLOR_RESET "\n", a->tok->lineNo,TOKENS[operator],a->tok->lexeme
+    ,a->expression.primitiveType, b->tok->lexeme, b->expression.primitiveType,message);
 }
 
 void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
@@ -504,111 +504,105 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
 void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operation, TypeExprEntry *table)
 {
     Terminal op = operation->terminal;
-    int typeExprPrimOfParent = root->expression.primitiveType;
-    int typeExprPrimOfRightExpr = rightExpr->expression.primitiveType;
 
-    switch (op)
+    int typeParent = root->type;
+    int typeRightExpr = rightExpr->type;
+
+    if (typeParent != typeRightExpr)
     {
-    case PLUS:
+        printTypeCheckError(root, rightExpr, op, "Type Mismatch");
+    }
+    else
     {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
+        switch (typeParent)
         {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        else
+        case PRIMITIVE:
         {
-            if (typeExprPrimOfParent == PRIM_BOOLEAN)
+            int typeExprPrimOfParent = root->expression.primitiveType;
+            int typeExprPrimOfRightExpr = rightExpr->expression.primitiveType;
+
+            if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
             {
-                printf("2 BOOLEAN VARIABLES CANNOT BE ADDED\n");
+                printTypeCheckError(root, rightExpr, op, "Type Mismatch");
             }
-        }
-        break;
-    }
-    case MINUS:
-    {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
-        {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        else
-        {
-            if (typeExprPrimOfParent == PRIM_BOOLEAN)
+            switch (op)
             {
-                printf("2 BOOLEAN VARIABLES CANNOT BE SUBTRACTED\n");
-            }
-        }
-        break;
-    }
-    case MULT:
-    {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
-        {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        else
-        {
-            if (typeExprPrimOfParent == PRIM_BOOLEAN)
+            case PLUS:
             {
-                printf("2 BOOLEAN VARIABLES CANNOT BE MULTIPLIED\n");
+                if (typeExprPrimOfParent == PRIM_BOOLEAN)
+                {
+                    printTypeCheckError(root, rightExpr, op, "Bool var cannot be added");
+                }
+                break;
             }
-        }
-        break;
-    }
-    case DIV:
-    {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
-        {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        else
-        {
-            if (typeExprPrimOfParent == PRIM_BOOLEAN)
+            case MINUS:
             {
-                printf("2 BOOLEAN VARIABLES CANNOT BE DIVIDED\n");
-                return;
+                if (typeExprPrimOfParent == PRIM_BOOLEAN)
+                {
+                    printTypeCheckError(root, rightExpr, op, "Bool var cannot be subtracted");
+                }
+                break;
             }
-            root->expression.primitiveType = PRIM_REAL;
-        }
-        break;
-    }
-    case EQUALS:
-    {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
-        {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        break;
-    }
-    case OR:
-    {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
-        {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        else
-        {
-            if (typeExprPrimOfParent == PRIM_INTEGER || typeExprPrimOfParent == PRIM_REAL)
+            case MULT:
             {
-                printf("OR CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES ONLY\n");
+                if (typeExprPrimOfParent == PRIM_BOOLEAN)
+                {
+                    printTypeCheckError(root, rightExpr, op, "Bool var cannot be multiplied");
+                }
+                break;
             }
-        }
-        break;
-    }
-    case AND:
-    {
-        if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
-        {
-            printTypeCheckError(root, rightExpr, op);
-        }
-        else
-        {
-            if (typeExprPrimOfParent == PRIM_INTEGER || typeExprPrimOfParent == PRIM_REAL)
+            case DIV:
             {
-                printf("AND CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES ONLY\n");
+                if (typeExprPrimOfParent == PRIM_BOOLEAN)
+                {
+                    printTypeCheckError(root, rightExpr, op, "Bool var cannot be divided");
+                    return;
+                }
+                root->expression.primitiveType = PRIM_REAL;
+                break;
             }
+            case EQUALS:
+            {
+                break;
+            }
+            case OR:
+            {
+                if (typeExprPrimOfParent == PRIM_INTEGER)
+                {
+                    printTypeCheckError(root, rightExpr, op, "OR operation on integer var");
+                }
+                else if (typeExprPrimOfParent == PRIM_REAL)
+                {
+                    printTypeCheckError(root, rightExpr, op, "OR operation on real var");
+                }
+                break;
+            }
+            case AND:
+            {
+                if (typeExprPrimOfParent == PRIM_INTEGER)
+                {
+                    printTypeCheckError(root, rightExpr, op, "AND operation on integer var");
+                }
+                else if (typeExprPrimOfParent == PRIM_REAL)
+                {
+                    printTypeCheckError(root, rightExpr, op, "AND operation on real var");
+                }
+                break;
+            }
+            }
+            break;
         }
-        break;
-    }
+        case RECTANGULAR_ARRAY:
+        {
+            checkArrayCompatibility(root, rightExpr);
+            break;
+        }
+        case JAGGED_ARRAY:
+        {
+            checkArrayCompatibility(root, rightExpr);
+            break;
+        }
+        }
     }
 }
 
@@ -705,7 +699,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             primDeclChild = primDeclChild->next;
         }
-
+        root->typeInformationStored = 1;
         root->expression.primitiveType = primType;
         traverseParseTree(declareVarsNode, table);
         break;
@@ -837,42 +831,52 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         root->expression = root->parent->expression;
         TreeNode *statement = root->child;
         JaggedArray jaggArr = root->expression.jaggedType;
-        int x=0, y=0, r1Low, r1High, r1Len;
+        int x = 0, y = 0, r1Low, r1High, r1Len;
         r1Low = jaggArr.r1Low;
         r1High = jaggArr.r1High;
-        r1Len = r1High-r1Low+1;
+        r1Len = r1High - r1Low + 1;
 
-        while(statement!= NULL){
-            if(x>=r1Len){
+        while (statement != NULL)
+        {
+            if (x >= r1Len)
+            {
                 printf("Recieved More rows than expected in Jagged Array declaration\n");
                 break;
             }
             statement->expression = statement->parent->expression;
             int index = convertStringToInteger(nthChild(statement, 2)->tok->lexeme);
-            if(index!=r1Low+x){
+            if (index != r1Low + x)
+            {
                 printf("Incorrect order/index of rows for Jagged Arrays declaration\n");
             }
             int size = convertStringToInteger(nthChild(statement, 6)->tok->lexeme);
             jaggArr.type.twod_array.size[x] = size;
             statement->expression.jaggedType = jaggArr;
             TreeNode *twod_values = nthChild(statement, 10);
-            y=0;
-            while(1){
+            y = 0;
+            while (1)
+            {
                 twod_values->expression = twod_values->parent->expression;
                 y++;
-                if(nthChild(twod_values, 1)!=NULL) twod_values = nthChild(twod_values, 2);
-                else break;
+                if (nthChild(twod_values, 1) != NULL)
+                    twod_values = nthChild(twod_values, 2);
+                else
+                    break;
             }
-            if(y!=size){
+            if (y != size)
+            {
                 printf("Expected %d values in declaration, but got %d values\n", size, y);
             }
             x++;
-            if(statement->next!=NULL){
+            if (statement->next != NULL)
+            {
                 statement = statement->next->child;
             }
-            else break;
+            else
+                break;
         }
-        if(x<r1Len){
+        if (x < r1Len)
+        {
             printf("Expected %d number of rows in jagged array declaration, but obtained %d rows\n", r1Len, x);
         }
         root->expression.jaggedType = jaggArr;
@@ -897,19 +901,22 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         root->expression = root->parent->expression;
         TreeNode *statement = root->child;
-        int x=0, y=0, r1Low, r1High, r1Len;
+        int x = 0, y = 0, r1Low, r1High, r1Len;
         JaggedArray jaggArr = root->expression.jaggedType;
         r1Low = jaggArr.r1Low;
         r1High = jaggArr.r1High;
-        r1Len = r1High-r1Low+1;
-        while(statement!=NULL){
-            if(x>=r1Len){
+        r1Len = r1High - r1Low + 1;
+        while (statement != NULL)
+        {
+            if (x >= r1Len)
+            {
                 printf("Recieved More rows than expected in Jagged Array declaration\n");
                 break;
             }
             statement->expression = statement->parent->expression;
             int index = convertStringToInteger(nthChild(statement, 2)->tok->lexeme);
-            if(index!=r1Low+x){
+            if (index != r1Low + x)
+            {
                 printf("Incorrect order/index of rows for Jagged Arrays declaration\n");
             }
             int size = convertStringToInteger(nthChild(statement, 6)->tok->lexeme);
@@ -919,32 +926,44 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
 
             jaggArr.type.threed_array.size[x] = malloc(sizeof(int) * size);
 
-            y=0;
-            while(threed_values!=NULL){
+            y = 0;
+            while (threed_values != NULL)
+            {
                 threed_values->expression = threed_values->parent->expression;
                 jaggArr.type.threed_array.size[x][y] = 0;
                 TreeNode *threed_list = nthChild(threed_values, 0);
-                while(threed_list->child->terminal!=EPS){
+                while (threed_list->child->terminal != EPS)
+                {
                     threed_list->expression = threed_list->parent->expression;
                     jaggArr.type.threed_array.size[x][y]++;
-                    if(threed_list->child->next!=NULL){
+                    if (threed_list->child->next != NULL)
+                    {
+
                         threed_list = nthChild(threed_list, 1);
-                    } else break;
+                    }
+                    else
+                        break;
                 }
                 y++;
-                if(nthChild(threed_values, 1)!=NULL) threed_values = nthChild(threed_values, 2);
-                else break;
+                if (nthChild(threed_values, 1) != NULL)
+                    threed_values = nthChild(threed_values, 2);
+                else
+                    break;
             }
-            if(y!=size){
+            if (y != size)
+            {
                 printf("Expected %d values in declaration, but got %d values\n", size, y);
             }
             x++;
-            if(statement->next!=NULL){
+            if (statement->next != NULL)
+            {
                 statement = statement->next->child;
             }
-            else break;
+            else
+                break;
         }
-        if(x<r1Len){
+        if (x < r1Len)
+        {
             printf("Expected %d number of rows in jagged array declaration, but obtained %d rows\n", r1Len, x);
         }
         root->expression.jaggedType = jaggArr;
@@ -954,6 +973,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // curr node is declare_vars node
         // parent is primitive_decl/rect_array_decl/jagged_array_decl
+        root->typeInformationStored = 1;
         root->type = root->parent->type;
         root->expression = root->parent->expression;
         TreeNode *child = root->child;
@@ -974,6 +994,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // curr node is var_name_list
         TreeNode *parent = root->parent; // Parent is declare_vars or var_names_list
+        root->typeInformationStored = 1;
         root->type = parent->type;
         root->expression = parent->expression;
 
@@ -1033,6 +1054,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                     tEntry = &table[i];
                 }
             }
+            root->typeInformationStored = 1;
             root->type = tEntry->type;
             root->expression = tEntry->typeExpr;
             root->tok = child->tok;

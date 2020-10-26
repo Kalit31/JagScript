@@ -151,6 +151,7 @@ struct treenode
     // Variable type -> { PRIM, RECT, JAGGED }. Serves as the tag for union TypeExpression
     Type_Var type;
     TypeExpression expression;
+    int typeInformationStored;
     // Token containing lexeme, line number
     Token *tok;
     struct treenode *child;

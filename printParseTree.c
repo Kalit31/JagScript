@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "token.h"
+#include "printTypeExpression.c"
 
 void printTerminal(TreeNode *node, int level)
 {
@@ -12,7 +13,16 @@ void printTerminal(TreeNode *node, int level)
 void printNonTerminal(TreeNode *node, int level)
 {
     //printing non-leaf node
-    printf("%-20s\tNON TERMINAL\t\t--\t\t--\t\t%d\t\t%d\t\tTODO\n", NONTERMINALS[node->nonterminal], node->ruleNo, level);
+    printf("%-20s\tNON TERMINAL\t\t--\t\t--\t\t%d\t\t%d\t\t", NONTERMINALS[node->nonterminal], node->ruleNo, level);
+    if (node->typeInformationStored == 1)
+    {
+        printTypeExpression(node->type, node->expression);
+    }
+    else
+    {
+        printf("--");
+    }
+    printf("\n");
 }
 
 void printTraverse(TreeNode *root, int level)
@@ -43,7 +53,7 @@ void printTraverse(TreeNode *root, int level)
 
 void printParseTree(TreeNode *root)
 {
-    printf("SymbolName\t\tTerminal/NonTerminal\tNameOfLexeme\tLineNumber\tGrammarRule\tDepthOfNode\tTypeExpression\n");
+    printf("SymbolName\t\tTerminal/NonTerminal\tNameOfLexeme\tLineNumber\tGrammarRule\tDepthOfNode\tTypeExpression\n\n");
     printTraverse(root, 0);
     printf("\n----------------------------------------------------PRINTING PARSE TREE COMPLETED---------------------------------------------\n\n");
 
