@@ -1,5 +1,7 @@
 program ( )
 {
 declare v2 : integer ;
+declare s4 : jagged array [ 6 .. 6 ] [ ] [ ] of integer ;
+R1 [ 6 ] : size 3 : values { 21 641 23 36 125 ; ; 287 501 453 334 23 }
 v2 = 5 ;
 }

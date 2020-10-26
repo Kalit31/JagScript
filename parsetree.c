@@ -16,6 +16,7 @@ static int currentTableEntry = 0;
 
 int findTerminal(char *s)
 {
+
     for (int i = 0; i < NUM_TOKENS; i++)
     {
         if (strcmp(TOKENS[i], s) == 0)
