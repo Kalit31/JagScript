@@ -825,10 +825,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         jaggedArray.r1High = convertStringToInteger(nthChild(root, 6)->tok->lexeme);
         jaggedArray.is2D = 1;
 
-        jaggedArray.type.twod_array.x = 0;
-        jaggedArray.type.twod_array.y = 0;
         jaggedArray.type.twod_array.size = malloc(sizeof(int) * (jaggedArray.r1High - jaggedArray.r1Low + 1));
-        jaggedArray.type.twod_array.r2 = (int **)malloc(sizeof(int *) * (jaggedArray.r1High - jaggedArray.r1Low + 1));
         root->expression.jaggedType = jaggedArray;
         traverseParseTree(nthChild(root, 12), table);
         root->expression = nthChild(root, 12)->expression;
@@ -837,40 +834,42 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     case twod_jagged_statements:
     {
         root->expression = root->parent->expression;
-        traverseParseTree(nthChild(root, 0), table);
-        if (nthChild(root, 1) != NULL)
-        {
-            traverseParseTree(nthChild(root, 1), table);
-            root->expression = nthChild(root, 1)->expression;
-        }
-        break;
-    }
-    case twod_jagged_statement:
-    {
-        root->expression = root->parent->expression;
+        TreeNode *statement = root->child;
         JaggedArray jaggArr = root->expression.jaggedType;
-        int size = convertStringToInteger(nthChild(root, 5)->tok->lexeme);
-        jaggArr.type.twod_array.size[jaggArr.type.twod_array.x] = size;
-        jaggArr.type.twod_array.r2[jaggArr.type.twod_array.x] = malloc(sizeof(int) * size);
-        root->expression.jaggedType = jaggArr;
-        traverseParseTree(nthChild(root, 10), table);
-        root->expression = nthChild(root, 10)->expression;
-        root->expression.jaggedType.type.twod_array.x++;
-        root->expression.jaggedType.type.twod_array.y = 0;
-        break;
-    }
-    case twod_values:
-    {
-        root->expression = root->parent->expression;
-        JaggedArray jaggArr = root->expression.jaggedType;
-        (jaggArr.type.twod_array.r2[jaggArr.type.twod_array.x])[jaggArr.type.twod_array.y] = convertStringToInteger(nthChild(root, 0)->tok->lexeme);
-        jaggArr.type.twod_array.y++;
-        root->expression.jaggedType = jaggArr;
-        if (nthChild(root, 1) != NULL)
-        {
-            traverseParseTree(nthChild(root, 1), table);
-            root->expression = nthChild(root, 1)->expression;
+        int x=0, y=0, r1Low, r1High, r1Len;
+        r1Low = jaggArr.r1Low;
+        r1High = jaggArr.r1High;
+        r1Len = r1High-r1Low+1;
+
+        while(statement!= NULL){
+            if(x>=r1Len){
+                printf("Recieved More rows than expected in Jagged Array declaration\n");
+                break;
+            }
+            statement->expression = statement->parent->expression;
+            int index = convertStringToInteger(nthChild(root, 3)->tok->lexeme);
+            if(index!=r1Low+x){
+                printf("Incorrect order/index of rows for Jagged Arrays declaration\n");
+            }
+            int size = convertStringToInteger(nthChild(root, 6)->tok->lexeme);
+            jaggArr.type.twod_array.size[x] = size;
+            statement->expression.jaggedType = jaggArr;
+            TreeNode *twod_values = nthChild(statement, 10);
+            y=0;
+            while(twod_values != NULL){
+                twod_values->expression = twod_values->parent->expression;
+                y++;
+                twod_values = twod_values->next->child;
+            }
+            if(y!=size){
+                printf("Expected %d values in declaration, but got %d values\n", size, y);
+            }
+            x++;
         }
+        if(x<r1Len){
+            printf("Expected %d number of rows in jagged array declaration, but obtained %d rows\n", r1Len, x);
+        }
+        root->expression.jaggedType = jaggArr;
         break;
     }
     case declare_threed_jagged:
