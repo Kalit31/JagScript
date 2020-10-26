@@ -107,8 +107,6 @@ typedef struct RectangularArray
 typedef struct TwoDJaggedArray
 {
     int *size; // store size of each 1D subbarray
-    int x, y;  // store state of array while declaration
-    int **r2;  //(3, 6, 2, 4, 1, 5)
 } TwoDJaggedArray;
 
 typedef struct ThreeDJaggedArray
