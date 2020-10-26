@@ -25,7 +25,7 @@ Token *tokeniseSourcecode(char *fileName, Token *s)
     // Read the file line by line
     while (fscanf(fp, " %[^\n]", eachLine) != EOF)
     {
-        char *delim = " ";
+        char *delim = " \t";
         char *token;
 
         // Extract the leftmost non-terminal of the rule

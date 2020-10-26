@@ -4,6 +4,13 @@
 #include "typeExpression.h"
 #include "naryTree.c"
 #include "stack.c"
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_YELLOW "\x1b[33m"
+#define ANSI_COLOR_BLUE "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN "\x1b[36m"
+#define ANSI_COLOR_RESET "\x1b[0m"
 
 static int currentTableEntry = 0;
 
@@ -294,7 +301,8 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     globalTokenPtr = s;
     build(root, st, g);
     //root = buildNew(root, g);
-    printf("---------PARSING COMPLETED-------------\n");
+    printf("\n------------------------------------------------PARSE TREE IS CREATED SUCCESSFULLY--------------------------------------------\n\n");
+
     return root;
 }
 
@@ -372,6 +380,13 @@ void populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
 
 void populateNodeWithTypeExpression(TreeNode *node, TypeExprEntry *table, TreeNode *term)
 {
+    if (term->terminal == NUM)
+    {
+        node->type = PRIMITIVE;
+        node->expression.primitiveType = PRIM_INTEGER;
+        node->tok = term->tok;
+        return;
+    }
     int i = 0;
     for (; i < currentTableEntry; i++)
     {
@@ -394,14 +409,8 @@ void populateNodeFromNode(TreeNode *a, TreeNode *b)
 
 void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator)
 {
-    printf("TYPE ERROR\n");
-    printf("LINE NUMBER: %d\n", a->tok->lineNo);
-    printf("STATEMENT TYPE: ASSIGNMENT STATEMENT\n");
-    printf("OPERATOR: %s\n", TOKENS[operator]);
-    printf("LEXEME OF FIRST OPERAND: %s\n", a->tok->lexeme);
-    printf("TYPE OF FIRST OPERAND: %d\n", a->expression.primitiveType);
-    printf("LEXEME OF FIRST OPERAND: %s\n", b->tok->lexeme);
-    printf("TYPE OF FIRST OPERAND: %d\n", b->expression.primitiveType);
+    printf(ANSI_COLOR_RED  "%d\t\t\tASSIGNMENT %20s %20s %12d %20s %12d" ANSI_COLOR_RESET "\n", a->tok->lineNo,TOKENS[operator],a->tok->lexeme
+    ,a->expression.primitiveType, b->tok->lexeme, b->expression.primitiveType);
 }
 
 void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
@@ -501,8 +510,6 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
     {
     case PLUS:
     {
-        printf("%s : %d\n", root->tok->lexeme, root->expression.primitiveType);
-        printf("%s : %d\n", rightExpr->tok->lexeme, rightExpr->expression.primitiveType);
         if (typeExprPrimOfParent != typeExprPrimOfRightExpr)
         {
             printTypeCheckError(root, rightExpr, op);
@@ -581,7 +588,7 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
         {
             if (typeExprPrimOfParent == PRIM_INTEGER || typeExprPrimOfParent == PRIM_REAL)
             {
-                printf("OR CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES\n");
+                printf("OR CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES ONLY\n");
             }
         }
         break;
@@ -596,7 +603,7 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
         {
             if (typeExprPrimOfParent == PRIM_INTEGER || typeExprPrimOfParent == PRIM_REAL)
             {
-                printf("AND CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES\n");
+                printf("AND CAN BE DONE BETWEEN TWO BOOLEAN VARIABLES ONLY\n");
             }
         }
         break;
@@ -739,12 +746,12 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                             // idx is a ID
                             checkArrayVariableIsInteger(table, term->tok->lexeme);
                             rectArr.dimenArray[rectArr.currDimensions][0] = -1;
+                            rectArr.dynamicDimenArray[rectArr.currDimensions][0] = term->tok->lexeme;
                         }
                         else
                         {
                             // idx is a NUM
                             rectArr.dimenArray[rectArr.currDimensions][0] = convertStringToInteger(term->tok->lexeme);
-                            printf("D: %d\n", rectArr.dimenArray[rectArr.currDimensions][0]);
                         }
 
                         //dimenChild now points to ..
@@ -758,6 +765,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                             // idx is a ID
                             checkArrayVariableIsInteger(table, term->tok->lexeme);
                             rectArr.dimenArray[rectArr.currDimensions][1] = -1;
+                            rectArr.dynamicDimenArray[rectArr.currDimensions][1] = term->tok->lexeme;
                         }
                         else
                         {

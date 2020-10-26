@@ -9,29 +9,6 @@
 //Max to be fixed.
 #define MAX 1000
 
-void preorder(TreeNode *root)
-{
-    if (root == NULL)
-    {
-        return;
-    }
-    if (root->isLeaf)
-    {
-        printf("%s ", TOKENS[root->terminal]);
-        return;
-    }
-    else
-    {
-        printf("%s ", NONTERMINALS[root->nonterminal]);
-        TreeNode *child = root->child;
-        while (child != NULL)
-        {
-            preorder(child);
-            child = child->next;
-        }
-    }
-}
-
 int main()
 {
     clock_t begin = clock();
@@ -39,11 +16,11 @@ int main()
     char *fileName = "grammar.txt";
     readGrammar(fileName, arr);
 
-    printf("------------READING GRAMMER COMPLETED-------------\n");
+    printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
     Token *ts = NULL;
-    ts = tokeniseSourcecode("sourcecodetest.txt", ts);
-    printf("-------------TOKENISING SOURCE CODE COMPLETED-------------\n");
+    ts = tokeniseSourcecode("testcases/t1.txt", ts);
+    printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
@@ -52,6 +29,8 @@ int main()
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;
     traverseParseTree(t, typeExprTable);
+
+    printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
 
     printTypeExpressionTable(typeExprTable, currentTableEntry);
 

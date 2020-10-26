@@ -101,6 +101,7 @@ typedef struct RectangularArray
 {
     int currDimensions;                //2
     int dimenArray[MAX_DIMENSIONS][2]; //(2, 5), (3, 6)
+    char *dynamicDimenArray[MAX_DIMENSIONS][2];
 } RectangularArray;
 
 typedef struct TwoDJaggedArray

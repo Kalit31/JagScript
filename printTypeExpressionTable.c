@@ -8,5 +8,5 @@ void printTypeExpressionTable(TypeExprEntry *t, int totalentries)
     {
         printf("%-20s\t%d\t\t\t%d\t\t\tTODO\n", t[i].name, t[i].type, t[i].rectArrayType);
     }
-    printf("\n------------------------------------------------------------------------------------------------------------------------------\n\n");
+    printf("\n-----------------------------------------------PRINTING TYPE EXPRESSION TABLE COMPLETED---------------------------------------\n\n");
 }

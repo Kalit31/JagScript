@@ -45,6 +45,7 @@ void printParseTree(TreeNode *root)
 {
     printf("SymbolName\t\tTerminal/NonTerminal\tNameOfLexeme\tLineNumber\tGrammarRule\tDepthOfNode\tTypeExpression\n");
     printTraverse(root, 0);
-    printf("\n------------------------------------------------------------------------------------------------------------------------------\n\n");
+    printf("\n----------------------------------------------------PRINTING PARSE TREE COMPLETED---------------------------------------------\n\n");
+
     return;
 }
