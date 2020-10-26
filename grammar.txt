@@ -48,8 +48,11 @@ rhs arithmetic_expr SEMICOLON
 rhs boolean_expr SEMICOLON
 arithmetic_expr arithmetic_term op1 arithmetic_expr
 arithmetic_expr arithmetic_term
-arithmetic_term idx op2 arithmetic_term
-arithmetic_term idx 
+arithmetic_term idexpr op2 arithmetic_term
+arithmetic_term idexpr
+idexpr array_ele
+idexpr ID
+idexpr NUM 
 op1 PLUS 
 op1 MINUS
 op1 OR

@@ -396,6 +396,7 @@ void populateNodeWithTypeExpression(TreeNode *node, TypeExprEntry *table, TreeNo
             break;
         }
     }
+    node->typeInformationStored = 1;
     node->type = table[i].type;
     node->expression = table[i].typeExpr;
     node->tok = term->tok; //lexeme : v1, line no : 4
@@ -403,6 +404,7 @@ void populateNodeWithTypeExpression(TreeNode *node, TypeExprEntry *table, TreeNo
 
 void populateNodeFromNode(TreeNode *a, TreeNode *b)
 {
+    a->typeInformationStored = 1;
     a->type = b->type;
     a->expression = b->expression;
     a->tok = b->tok;
@@ -414,7 +416,13 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * mes
     ,a->expression.primitiveType, b->tok->lexeme, b->expression.primitiveType,message);
 }
 
-void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
+void checkArrayElementAccess(TreeNode *arrayEle)
+{
+    TreeNode *arrayID = arrayEle->child;
+    printf("HERE: %s\n", arrayID->tok->lexeme);
+}
+
+void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operation)
 {
     // Check if both arrays are of same dimensions
     if (node1->type == node2->type)
@@ -424,6 +432,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
             if (node1->expression.rectType.currDimensions != node2->expression.rectType.currDimensions)
             {
                 // Raise incompatibility error
+                printTypeCheckError(node1, node2, operation, "Arrays are incompatible");
             }
             else
             {
@@ -434,6 +443,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
                         node1->expression.rectType.dimenArray[curDimensions][1] != node2->expression.rectType.dimenArray[curDimensions][1])
                     {
                         // Dimensions incompatible
+                        printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
                     }
                 }
             }
@@ -443,6 +453,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
             if (node1->expression.jaggedType.is2D != node2->expression.jaggedType.is2D)
             {
                 // Raise error... Array types not compatible
+                printTypeCheckError(node1, node2, operation, "Arrays are incompatible");
             }
             else
             {
@@ -450,6 +461,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
                     node1->expression.jaggedType.r1High != node2->expression.jaggedType.r1High)
                 {
                     // Incompatible dimensions
+                    printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
                 }
                 if (node1->expression.jaggedType.is2D)
                 {
@@ -459,6 +471,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
                         if (node1->expression.jaggedType.type.twod_array.size[i] != node2->expression.jaggedType.type.twod_array.size[i])
                         {
                             // Array dimensions incompatible
+                            printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
                         }
                     }
                 }
@@ -486,6 +499,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
                                 if (node1->expression.jaggedType.type.threed_array.size[i][j] != node2->expression.jaggedType.type.threed_array.size[i][j])
                                 {
                                     // Array dimensions incompatible
+                                    printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
                                 }
                             }
                         }
@@ -498,6 +512,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2)
     {
         // Raise error... Array types not compatible
         // I assume that rectangular arrays aren't compatible with jagged arrays even if they are of same size
+        printTypeCheckError(node1, node2, operation, "Arrays are incompatible");
     }
 }
 
@@ -594,12 +609,12 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
         }
         case RECTANGULAR_ARRAY:
         {
-            checkArrayCompatibility(root, rightExpr);
+            checkArrayCompatibility(root, rightExpr, op);
             break;
         }
         case JAGGED_ARRAY:
         {
-            checkArrayCompatibility(root, rightExpr);
+            checkArrayCompatibility(root, rightExpr, op);
             break;
         }
         }
@@ -707,10 +722,10 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     case rect_array_decl:
     {
         // curr node is rectangular array declaration
+        root->typeInformationStored = 1;
         root->type = RECTANGULAR_ARRAY;
         RectangularArray rectArr;
         rectArr.currDimensions = 0;
-        root->expression.rectType = rectArr;
         TreeNode *rectDeclChild = root->child;
         TreeNode *declareVarsNode = NULL;
 
@@ -746,7 +761,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                         else
                         {
                             // idx is a NUM
-                            rectArr.dimenArray[rectArr.currDimensions][0] = convertStringToInteger(term->tok->lexeme);
+                            int num = convertStringToInteger(term->tok->lexeme);
+                            rectArr.dimenArray[rectArr.currDimensions][0] = num;
                         }
 
                         //dimenChild now points to ..
@@ -766,7 +782,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                         {
                             // idx is a NUM
                             rectArr.dimenArray[rectArr.currDimensions][1] = convertStringToInteger(term->tok->lexeme);
-                            printf("D: %d\n", rectArr.dimenArray[rectArr.currDimensions][1]);
                         }
 
                         //dimenChild now points to SBCL
@@ -789,6 +804,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             rectDeclChild = rectDeclChild->next;
         }
+        rectArr.currDimensions++;
+        root->expression.rectType = rectArr;
         traverseParseTree(declareVarsNode, table);
         break;
     }
@@ -1062,6 +1079,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         else
         {
             // lhs is array element
+            root->typeInformationStored = 1;
+            root->type = PRIMITIVE;
+            root->expression.primitiveType = PRIM_INTEGER;
             traverseParseTree(child, table);
         }
         break;
@@ -1101,10 +1121,10 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // parent is arith_expr or arith_term
         TreeNode *parent = root->parent;
-        TreeNode *idx = root->child;
-        traverseParseTree(idx, table);
+        TreeNode *idexpr = root->child;
+        traverseParseTree(idexpr, table);
 
-        if (idx->next == NULL)
+        if (idexpr->next == NULL)
         {
             if (parent->child == root)
             {
@@ -1112,10 +1132,10 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
         }
 
-        if (idx->next != NULL)
+        if (idexpr->next != NULL)
         {
             //op2 would be either MULT or DIV node
-            TreeNode *op2 = idx->next;
+            TreeNode *op2 = idexpr->next;
             TreeNode *arithTerm = op2->next;
             traverseParseTree(arithTerm, table);
             //do type checking for idx and arithTerm;
@@ -1124,11 +1144,25 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         break;
     }
-    case idx:
+    case idexpr:
     {
-        TreeNode *term = root->child; // ID Node
-        populateNodeWithTypeExpression(root, table, term);
-        populateNodeFromNode(root->parent, root);
+        TreeNode *child = root->child;
+        if (child->isLeaf)
+        {
+            // ID Node or NUM Node
+            populateNodeWithTypeExpression(root, table, child);
+            populateNodeFromNode(root->parent, root);
+        }
+        else
+        {
+            // Array Element
+            // Check whether we are correctly accessing the array
+            traverseParseTree(child, table);
+            root->type = PRIMITIVE;
+            root->expression.primitiveType = PRIM_INTEGER;
+            root->parent->type = PRIMITIVE;
+            root->parent->expression.primitiveType = PRIM_INTEGER;
+        }
         break;
     }
     case array_ele:
@@ -1144,29 +1178,33 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         if (tEntry->rectArrayType == DYNAMIC)
         {
+            printf("ERROR ACC TO PG 11 LAST PARA\n");
             // Raise error as per pg 11, last paragraph
         }
         TreeNode *child = nthChild(root, 2)->child; //list
 
         if (tEntry->type == RECTANGULAR_ARRAY)
         {
-            int i = root->expression.rectType.currDimensions;
+            int i = tEntry->typeExpr.rectType.currDimensions;
+
             while (1)
             {
                 i--;
                 if (child->child->terminal == ID)
                 {
                     //Raise error as per pg 11
+                    printf("ERROR ACC TO PG 11\n");
                     break;
                 }
                 else
                 {
                     // It is a Num
                     int idx = convertStringToInteger(child->child->tok->lexeme);
-                    if (idx > root->expression.rectType.dimenArray[i][1] ||
-                        idx < root->expression.rectType.dimenArray[i][0])
+                    if (idx > tEntry->typeExpr.rectType.dimenArray[i][1] ||
+                        idx < tEntry->typeExpr.rectType.dimenArray[i][0])
                     {
                         // Index out of Bounds...Raise Error
+                        printf("INDEX OUT OF BOUNDS\n");
                     }
                     if (child->next != NULL)
                         child = child->next->child;
@@ -1184,10 +1222,12 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             if (child->next == NULL || child->next->child->next == NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
+                printf("INCOMPATIBLE DIMENSIONS\n");
             }
             if (child->child->terminal == ID || child->next->child->child->terminal == ID)
             {
                 // Error
+                printf("ARRAY ACCESS ERROR\n");
                 break;
             }
             else
@@ -1197,10 +1237,12 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 if (x1 > tEntry->typeExpr.jaggedType.r1High || x1 < tEntry->typeExpr.jaggedType.r1Low)
                 {
                     // 1st dimension out of bounds
+                    printf("1st dimension out of bounds");
                 }
                 else if (x2 > tEntry->typeExpr.jaggedType.type.twod_array.size[x1 - tEntry->typeExpr.jaggedType.r1Low] || x2 < 1)
                 {
                     // 2nd dimension out of bounds
+                    printf("2nd dimension out of bounds");
                 }
             }
         }
@@ -1209,10 +1251,12 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next == NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
+                printf("INCOMPATIBLE DIMENSIONS\n");
             }
             if (child->child->terminal == ID || child->next->child->child->terminal == ID)
             {
                 // Error
+                printf("ARRAY ACCESS ERROR\n");
                 break;
             }
             else
@@ -1223,14 +1267,17 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 if (x1 > tEntry->typeExpr.jaggedType.r1High || x1 < tEntry->typeExpr.jaggedType.r1Low)
                 {
                     // 1st dimension out of bounds
+                    printf("1st dimension out of bounds");
                 }
                 else if (x2 > tEntry->typeExpr.jaggedType.type.threed_array.sizeR2[x1 - tEntry->typeExpr.jaggedType.r1Low] || x2 < 1)
                 {
                     // 2nd dimension out of bounds
+                    printf("2nd dimension out of bounds");
                 }
                 else if (x3 > tEntry->typeExpr.jaggedType.type.threed_array.size[x1 - tEntry->typeExpr.jaggedType.r1Low][x2 - 1] || x3 < 1)
                 {
                     // 3rd dimension out of bounds
+                    printf("3rd dimension out of bounds");
                 }
             }
         }

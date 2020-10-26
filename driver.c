@@ -35,9 +35,9 @@ int main()
 
     printf("\n-------------------------------------------------TRAVERSING PARSE TREE COMPLETED---------------------------------------------\n\n");
 
-    printParseTree(t);
-
     printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
+
+    printParseTree(t);
 
     printTypeExpressionTable(typeExprTable, currentTableEntry);
 

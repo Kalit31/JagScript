@@ -1,8 +1,9 @@
 program ( )
 {
 declare v1 : real ;
-declare v2 : integer ;
+declare v2 : real ;
 declare v3 : real ;
-declare u : array [ 2 .. 5 ] [ 3 .. 6 ] of integer ;
+declare u : array [ 2 .. 5 ] of integer ;
 v1 = v2 + v3 ;
+u [ 2 ] = 10 ;
 }

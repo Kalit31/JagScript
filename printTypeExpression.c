@@ -36,9 +36,9 @@ void printTypeExpression(int type, TypeExpression typeExpr)
     {
         RectangularArray raExp = typeExpr.rectType;
         printf("rectangularArray, dimensions=%d,", raExp.currDimensions);
-        for (int i = 1; i <= raExp.currDimensions; i++)
+        for (int i = 0; i < raExp.currDimensions; i++)
         {
-            printf("range_R%d=(", (i - 1));
+            printf("range_R%d=(", (i + 1));
             if (raExp.dimenArray[i][0] != -1)
             {
                 printf("%d,", raExp.dimenArray[i][0]);
