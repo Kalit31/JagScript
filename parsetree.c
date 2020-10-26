@@ -857,7 +857,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             statement->expression.jaggedType = jaggArr;
             TreeNode *twod_values = nthChild(statement, 10);
             y=0;
-            while(twod_values != NULL){
+            while(1){
                 twod_values->expression = twod_values->parent->expression;
                 y++;
                 if(nthChild(twod_values, 1)!=NULL) twod_values = nthChild(twod_values, 2);
@@ -917,31 +917,35 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             statement->expression.jaggedType = jaggArr;
             TreeNode *threed_values = nthChild(statement, 10);
 
-            jaggArr.type.threed_array.sizeR2[x] = size;
             jaggArr.type.threed_array.size[x] = malloc(sizeof(int) * size);
 
+            y=0;
             while(threed_values!=NULL){
-                y=0;
                 threed_values->expression = threed_values->parent->expression;
                 jaggArr.type.threed_array.size[x][y] = 0;
-                root->expression.jaggedType = jaggArr;
                 TreeNode *threed_list = nthChild(threed_values, 0);
-                while(threed_list!=NULL){
+                while(threed_list->child->terminal!=EPS){
                     threed_list->expression = threed_list->parent->expression;
                     jaggArr.type.threed_array.size[x][y]++;
-                    if(threed_list->next!=NULL){
+                    if(threed_list->child->next!=NULL){
                         threed_list = nthChild(threed_list, 1);
                     } else break;
                 }
                 y++;
-                if(threed_values->next!=NULL) threed_values = nthChild(threed_values, 2);
+                if(nthChild(threed_values, 1)!=NULL) threed_values = nthChild(threed_values, 2);
                 else break;
+            }
+            if(y!=size){
+                printf("Expected %d values in declaration, but got %d values\n", size, y);
             }
             x++;
             if(statement->next!=NULL){
                 statement = statement->next->child;
             }
             else break;
+        }
+        if(x<r1Len){
+            printf("Expected %d number of rows in jagged array declaration, but obtained %d rows\n", r1Len, x);
         }
         root->expression.jaggedType = jaggArr;
         break;
