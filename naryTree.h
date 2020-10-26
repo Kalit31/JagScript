@@ -112,8 +112,6 @@ typedef struct TwoDJaggedArray
 typedef struct ThreeDJaggedArray
 {
     int **size, *sizeR2; // store size of each subbarray
-    int x, y, z;         // store state of array while declaration
-    int ***dimen;        //3 [ 5, 3, 5] , 2 [ 3, 5], 3 [ 5, 4, 3] ,4 [ 2, 5, 4, 4]
 } ThreeDJaggedArray;
 
 typedef union JaggedArrayType
