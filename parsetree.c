@@ -895,14 +895,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     case threed_jagged_statements:
     {
         root->expression = root->parent->expression;
-        traverseParseTree(nthChild(root, 0), table);
-        if (nthChild(root, 1) != NULL)
-        {
-            traverseParseTree(nthChild(root, 1), table);
-            root->expression = nthChild(root, 1)->expression;
-        }
         TreeNode *statement = root->child;
-        int x=0, y=0, z=0, r1Low, r1High, r1Len;
+        int x=0, y=0, r1Low, r1High, r1Len;
         JaggedArray jaggArr = root->expression.jaggedType;
         r1Low = jaggArr.r1Low;
         r1High = jaggArr.r1High;
@@ -922,29 +916,33 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             statement->expression.jaggedType = jaggArr;
             TreeNode *threed_values = nthChild(statement, 10);
 
-            jaggArr.type.threed_array.sizeR2[jaggArr.type.threed_array.x] = size;
+            jaggArr.type.threed_array.sizeR2[x] = size;
             jaggArr.type.threed_array.size[x] = malloc(sizeof(int) * size);
 
             while(threed_values!=NULL){
                 y=0;
-                root->expression = root->parent->expression;
+                threed_values->expression = threed_values->parent->expression;
                 jaggArr.type.threed_array.size[x][y] = 0;
                 root->expression.jaggedType = jaggArr;
-                TreeNode *threed_list = nthChild(threed_values, 1);
+                TreeNode *threed_list = nthChild(threed_values, 0);
                 while(threed_list!=NULL){
-                    root->expression = root->parent->expression;
+                    threed_list->expression = threed_list->parent->expression;
                     jaggArr.type.threed_array.size[x][y]++;
-                    z++;
-                    if(threed_list->next->child!=NULL){
-                        threed_list = threed_list->next->child;
+                    if(threed_list->next!=NULL){
+                        threed_list = nthChild(threed_list, 1);
                     } else break;
                 }
                 y++;
-                if(threed_values->next!=NULL) threed_values = threed_values->next->child;
+                if(threed_values->next!=NULL) threed_values = nthChild(threed_values, 2);
                 else break;
             }
             x++;
+            if(statement->next!=NULL){
+                statement = statement->next->child;
+            }
+            else break;
         }
+        root->expression.jaggedType = jaggArr;
         break;
     }
     case declare_vars:

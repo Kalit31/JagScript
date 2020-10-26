@@ -24,7 +24,7 @@ int main()
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
-    printParseTree(t);
+    // printParseTree(t);
 
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;

@@ -35,7 +35,7 @@ static char *TOKENS[NUM_TOKENS] = {
     "EQUALS",
     "ID",
     "NUM",
-    "EPS"
+    "EPS",
     "ERR"};
 
 typedef enum TokenName
