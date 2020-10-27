@@ -19,7 +19,7 @@ int main()
     printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
     Token *ts = NULL;
-    fileName = "testcases/t1.txt";
+    fileName = "testcases/t6.txt";
     ts = tokeniseSourcecode(fileName, ts);
     printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 
@@ -29,7 +29,7 @@ int main()
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;
 
-    printf("LineNo.\t\t\tStatement Type\t\tOperator\t\tLexeme1\t\tType1\t\tLexeme2\t\tType2\t\tMessage\n\n");
+    printf("LineNo.\t\tStatement Type\t\tOperator\tLexeme1\t\t\tType1\t\tLexeme2\t\t\tType2\t\t\tMessage\n\n");
 
     traverseParseTree(t, typeExprTable);
 
