@@ -92,7 +92,7 @@ void deleteChildren(TreeNode *node)
 
 Token *globalTokenPtr;
 
-int build(TreeNode *curr, Stack *st, Node *g)
+int build(TreeNode *curr, Stack *st, Node *g, int depth)
 {
     StackNode *t = top(st);
     if (globalTokenPtr == NULL && t == NULL)
@@ -153,6 +153,7 @@ int build(TreeNode *curr, Stack *st, Node *g)
                 {
                     n = createNonLeafNode(findNonTerminal(r->element));
                 }
+                n->depth = depth;
                 n->parent = t->val;
                 n->next = NULL;
                 if (currSibling == NULL)
@@ -166,7 +167,7 @@ int build(TreeNode *curr, Stack *st, Node *g)
                 currSibling = n;
 
                 push(st, n);
-                if (build(n, st, g) == 0)
+                if (build(n, st, g, depth + 1) == 0)
                 {
                     possible = 0;
                     break;
@@ -280,7 +281,7 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     TreeNode *root = initialiseParseTree();
     push(st, root);
     globalTokenPtr = s;
-    build(root, st, g);
+    build(root, st, g, 1);
     //root = buildNew(root, g);
     printf("\n------------------------------------------------PARSE TREE IS CREATED SUCCESSFULLY--------------------------------------------\n\n");
 
@@ -308,7 +309,7 @@ void printArrayError(char *name, int type, char *message, int lineno)
         break;
     }
     }
-    printf("%d\t\tDECLARATION\t\t     ***%15s%22s\t\t    ***\t\t\t  ***\t%25s"
+    printf("%d\t\tDECLARATION\t\t     ***%15s%22s\t\t    ***\t\t\t  ***\t\t  ***\t%25s"
            "\n",
            lineno,
            name, typeName, message);
@@ -354,8 +355,8 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * mes
         break;
     }
     }
-    printf("%d\t\tASSIGNMENT%22s%15s%22s%18s%22s\t%25s"  "\n", a->tok->lineNo,TOKENS[operator],a->tok->lexeme
-    ,typeName1, b->tok->lexeme,typeName2,message);
+    printf("%d\t\tASSIGNMENT%22s%15s%22s%18s%22s\t%13d\t%25s"  "\n", a->tok->lineNo,TOKENS[operator],a->tok->lexeme
+    ,typeName1, b->tok->lexeme,typeName2,b->depth,message);
 }
 
 void checkArrayVariableIsInteger(TypeExprEntry *table, Token *tok)

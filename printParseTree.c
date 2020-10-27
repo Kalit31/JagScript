@@ -4,16 +4,17 @@
 #include "token.h"
 #include "printTypeExpression.c"
 
-void printTerminal(TreeNode *node, int level)
+void printTerminal(TreeNode *node)
 {
     //printing leaf node in pretty columns
-    if(node->terminal!=EPS && node->tok!=NULL) printf("%-20s\tTERMINAL\t\t%-10s\t%d\t\t--\t\t%d\t\t--\n", TOKENS[node->terminal], node->tok->lexeme, node->tok->lineNo, level);
+    if (node->terminal != EPS && node->tok != NULL)
+        printf("%-20s\tTERMINAL\t\t%-10s\t%d\t\t--\t\t%d\t\t--\n", TOKENS[node->terminal], node->tok->lexeme, node->tok->lineNo, node->depth);
 }
 
-void printNonTerminal(TreeNode *node, int level)
+void printNonTerminal(TreeNode *node)
 {
     //printing non-leaf node
-    printf("%-20s\tNON TERMINAL\t\t--\t\t--\t\t%d\t\t%d\t\t", NONTERMINALS[node->nonterminal], node->ruleNo, level);
+    printf("%-20s\tNON TERMINAL\t\t--\t\t--\t\t%d\t\t%d\t\t", NONTERMINALS[node->nonterminal], node->ruleNo, node->depth);
     if (node->typeInformationStored == 1)
     {
         printTypeExpression(node->type, node->expression);
@@ -25,8 +26,9 @@ void printNonTerminal(TreeNode *node, int level)
     printf("\n");
 }
 
-void printTraverse(TreeNode *root, int level)
+void printTraverse(TreeNode *root)
 {
+
     // preorder traversal
     if (root == NULL)
     {
@@ -36,17 +38,17 @@ void printTraverse(TreeNode *root, int level)
     if (root->isLeaf)
     {
         // is a leaf node
-        printTerminal(root, level);
+        printTerminal(root);
     }
     else
     {
-        printNonTerminal(root, level);
+        printNonTerminal(root);
     }
 
     TreeNode *iter = root->child;
     while (iter != NULL)
     {
-        printTraverse(iter, level + 1);
+        printTraverse(iter);
         iter = iter->next;
     }
 }
@@ -54,7 +56,7 @@ void printTraverse(TreeNode *root, int level)
 void printParseTree(TreeNode *root)
 {
     printf("SymbolName\t\tTerminal/NonTerminal\tNameOfLexeme\tLineNumber\tGrammarRule\tDepthOfNode\tTypeExpression\n\n");
-    printTraverse(root, 0);
+    printTraverse(root);
     printf("\n----------------------------------------------------PRINTING PARSE TREE COMPLETED---------------------------------------------\n\n");
 
     return;

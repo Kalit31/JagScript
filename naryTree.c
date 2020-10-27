@@ -6,6 +6,7 @@ TreeNode *initialiseParseTree()
 {
     TreeNode *node = createNonLeafNode(s);
     node->parent = NULL;
+    node->depth = 0;
     return node;
 }
 TreeNode *createLeafNode(Terminal terminal)

@@ -153,6 +153,7 @@ struct treenode
     int typeInformationStored;
     // Token containing lexeme, line number
     Token *tok;
+    int depth;
     struct treenode *child;
     struct treenode *parent;
     struct treenode *next; //next node in the same level
