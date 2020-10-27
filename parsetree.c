@@ -716,6 +716,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         root->typeInformationStored = 1;
         root->expression.primitiveType = primType;
+        // Traverse declare_vars node
         traverseParseTree(declareVarsNode, table);
         break;
     }
@@ -799,7 +800,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                             break;
                         }
                     }
-                    traverseParseTree(rectArrChild, table);
+                    // traverseParseTree(rectArrChild, table);
                 }
             }
             rectDeclChild = rectDeclChild->next;
@@ -1158,16 +1159,14 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             // Array Element
             // Check whether we are correctly accessing the array
             traverseParseTree(child, table);
-            root->type = PRIMITIVE;
-            root->expression.primitiveType = PRIM_INTEGER;
-            root->parent->type = PRIMITIVE;
-            root->parent->expression.primitiveType = PRIM_INTEGER;
+            populateNodeFromNode(root->parent, root); //root->parent->tok = root->tok;
         }
         break;
     }
     case array_ele:
     {
         char *lex = root->child->tok->lexeme;
+        root->tok = root->child->tok;
         TypeExprEntry *tEntry;
         for (int i = 0; i < currentTableEntry; i++)
         {

@@ -26,8 +26,6 @@ int main()
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
 
-    printParseTree(t);
-
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;
 
@@ -38,6 +36,8 @@ int main()
     printf("\n-------------------------------------------------TRAVERSING PARSE TREE COMPLETED---------------------------------------------\n\n");
 
     printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
+
+    printParseTree(t);
 
     printTypeExpressionTable(typeExprTable, currentTableEntry);
 
