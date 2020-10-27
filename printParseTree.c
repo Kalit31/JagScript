@@ -7,7 +7,7 @@
 void printTerminal(TreeNode *node, int level)
 {
     //printing leaf node in pretty columns
-    printf("%-20s\tTERMINAL\t\t%-10s\t%d\t\t--\t\t%d\t\t--\n", TOKENS[node->terminal], node->tok->lexeme, node->tok->lineNo, level);
+    if(node->terminal!=EPS && node->tok!=NULL) printf("%-20s\tTERMINAL\t\t%-10s\t%d\t\t--\t\t%d\t\t--\n", TOKENS[node->terminal], node->tok->lexeme, node->tok->lineNo, level);
 }
 
 void printNonTerminal(TreeNode *node, int level)

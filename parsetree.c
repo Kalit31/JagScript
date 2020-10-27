@@ -817,7 +817,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         TreeNode *declareVarsNode = nthChild(root, 1);
         TreeNode *declareJagged = nthChild(root, 3);
         traverseParseTree(declareJagged, table);
-        root->expression = nthChild(root, 1)->expression;
+        root->expression = nthChild(root, 3)->expression;
         traverseParseTree(declareVarsNode, table);
         break;
     }
