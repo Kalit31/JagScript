@@ -877,6 +877,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             while (1)
             {
                 twod_values->expression = twod_values->parent->expression;
+                if(twod_values->child->child->next->child->terminal!=EPS){
+                    printf("Type Definition Error for 2D Jagged Array\n");
+                }
                 y++;
                 if (nthChild(twod_values, 1) != NULL)
                     twod_values = nthChild(twod_values, 2);

@@ -28,7 +28,7 @@ declare_threed_jagged JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL SBOP SBCL 
 threed_jagged_statements threed_jagged_statement threed_jagged_statements 
 threed_jagged_statements threed_jagged_statement
 threed_jagged_statement R SBOP NUM SBCL COLON SIZE NUM COLON VALUES CBOP values CBCL
-values list_num SEMICOLON threed_values
+values list_num SEMICOLON values
 values list_num
 list_num NUM list_num
 list_num EPS
