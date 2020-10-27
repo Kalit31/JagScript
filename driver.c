@@ -19,7 +19,7 @@ int main()
     printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
     Token *ts = NULL;
-    fileName = "testcases/t3.txt";
+    fileName = "testcases/t1.txt";
     ts = tokeniseSourcecode(fileName, ts);
     printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 

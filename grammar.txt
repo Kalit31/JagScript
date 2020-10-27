@@ -23,15 +23,13 @@ declare_jagged declare_threed_jagged
 declare_twod_jagged JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL OF INTEGER SEMICOLON twod_jagged_statements
 twod_jagged_statements twod_jagged_statement twod_jagged_statements
 twod_jagged_statements twod_jagged_statement
-twod_jagged_statement R SBOP NUM SBCL  COLON SIZE NUM COLON VALUES CBOP twod_values CBCL
-twod_values NUM SEMICOLON twod_values 
-twod_values NUM
+twod_jagged_statement R SBOP NUM SBCL  COLON SIZE NUM COLON VALUES CBOP values CBCL
 declare_threed_jagged JAGGED ARRAY SBOP NUM TWODOT NUM SBCL SBOP SBCL SBOP SBCL OF INTEGER SEMICOLON threed_jagged_statements
 threed_jagged_statements threed_jagged_statement threed_jagged_statements 
 threed_jagged_statements threed_jagged_statement
-threed_jagged_statement R SBOP NUM SBCL COLON SIZE NUM COLON VALUES CBOP threed_values CBCL
-threed_values list_num SEMICOLON threed_values
-threed_values list_num
+threed_jagged_statement R SBOP NUM SBCL COLON SIZE NUM COLON VALUES CBOP values CBCL
+values list_num SEMICOLON values
+values list_num
 list_num NUM list_num
 list_num EPS
 idx ID 
