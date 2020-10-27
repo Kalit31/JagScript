@@ -870,6 +870,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             int size = convertStringToInteger(nthChild(statement, 6)->tok->lexeme);
             jaggArr.type.twod_array.size[x] = size;
             statement->expression.jaggedType = jaggArr;
+
+            //TODO: This has to be changed to values
             TreeNode *twod_values = nthChild(statement, 10);
             y = 0;
             while (1)
@@ -940,6 +942,8 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             int size = convertStringToInteger(nthChild(statement, 6)->tok->lexeme);
             jaggArr.type.threed_array.sizeR2[x] = size;
             statement->expression.jaggedType = jaggArr;
+
+            //TODO: This has to be changed to values
             TreeNode *threed_values = nthChild(statement, 10);
 
             jaggArr.type.threed_array.size[x] = malloc(sizeof(int) * size);

@@ -2,8 +2,8 @@
 #define NARYTREE
 
 #include "token.h"
-#define NUM_NON_TERMINALS 36
-#define NUM_RULES 60
+#define NUM_NON_TERMINALS 35
+#define NUM_RULES 58
 #define MAX_DIMENSIONS 10
 
 static char *NONTERMINALS[NUM_NON_TERMINALS] = {
@@ -26,10 +26,9 @@ static char *NONTERMINALS[NUM_NON_TERMINALS] = {
     "declare_threed_jagged",
     "twod_jagged_statements",
     "twod_jagged_statement",
-    "twod_values",
     "threed_jagged_statements",
     "threed_jagged_statement",
-    "threed_values",
+    "values",
     "list_num",
     "assignment",
     "lhs",
@@ -65,10 +64,9 @@ typedef enum NonTerminal
     declare_threed_jagged,
     twod_jagged_statements,
     twod_jagged_statement,
-    twod_values,
     threed_jagged_statements,
     threed_jagged_statement,
-    threed_values,
+    values,
     list_num,
     assignment,
     lhs,
