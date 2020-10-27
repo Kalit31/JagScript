@@ -460,12 +460,6 @@ void populateNodeFromNode(TreeNode *a, TreeNode *b)
     a->tok = b->tok;
 }
 
-void checkArrayElementAccess(TreeNode *arrayEle)
-{
-    TreeNode *arrayID = arrayEle->child;
-    printf("HERE: %s\n", arrayID->tok->lexeme);
-}
-
 void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operation)
 {
     // Check if both arrays are of same dimensions
@@ -1267,9 +1261,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         {
             // Raise error as per pg 11, last paragraph
             if (root->tok == NULL)
-                printArrayError("**", 2, "Array is dynamic", -1);
+                printArrayError("**", 2, "Array is static", -1);
             else
-                printArrayError(root->tok->lexeme, tEntry->type, "Array is dynamic", root->tok->lineNo);
+                printArrayError(root->tok->lexeme, tEntry->type, "Array is static", root->tok->lineNo);
         }
         TreeNode *child = nthChild(root, 2)->child; //list
 
@@ -1282,6 +1276,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 i--;
                 if (child->child->terminal == ID)
                 {
+                    checkArrayVariableIsInteger(tEntry, root->tok);
                     //Raise error as per pg 11
                     if (root->tok == NULL)
                         printArrayError("**", 2, "Array is dynamic", -1);
@@ -1329,6 +1324,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             if (child->child->terminal == ID || child->next->child->child->terminal == ID)
             {
+                checkArrayVariableIsInteger(tEntry, root->tok);
                 // Error
                 if (root->tok == NULL)
                     printArrayError("**", 2, "Array access error", -1);
@@ -1370,6 +1366,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             if (child->child->terminal == ID || child->next->child->child->terminal == ID)
             {
+                checkArrayVariableIsInteger(tEntry, root->tok);
                 // Error
                 if (root->tok == NULL)
                     printArrayError("**", 2, "Array access error", -1);
