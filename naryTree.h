@@ -126,6 +126,7 @@ typedef struct JaggedArray
     int r1Low;
     int r1High;
     JaggedArrayType type;
+    int isValid;
 } JaggedArray;
 
 typedef union TypeExpression
