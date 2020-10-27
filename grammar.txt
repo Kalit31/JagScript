@@ -45,7 +45,6 @@ array_ele ID SBOP list SBCL
 list idx list
 list idx
 rhs arithmetic_expr SEMICOLON
-rhs boolean_expr SEMICOLON
 arithmetic_expr arithmetic_term op1 arithmetic_expr
 arithmetic_expr arithmetic_term
 arithmetic_term idexpr op2 arithmetic_term

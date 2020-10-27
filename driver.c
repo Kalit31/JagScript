@@ -19,12 +19,14 @@ int main()
     printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
     Token *ts = NULL;
-    fileName = "sourcecodetest.txt";
+    fileName = "testcases/t3.txt";
     ts = tokeniseSourcecode(fileName, ts);
     printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 
     TreeNode *t = NULL;
     t = createParseTree(t, ts, arr);
+
+    printParseTree(t);
 
     TypeExprEntry typeExprTable[MAX];
     currentTableEntry = 0;
@@ -37,8 +39,6 @@ int main()
 
     printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
 
-    printParseTree(t);
-
     printTypeExpressionTable(typeExprTable, currentTableEntry);
 
     clock_t end = clock();
@@ -47,3 +47,5 @@ int main()
 
     return 0;
 }
+/*
+*/

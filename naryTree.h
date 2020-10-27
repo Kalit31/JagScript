@@ -3,7 +3,7 @@
 
 #include "token.h"
 #define NUM_NON_TERMINALS 36
-#define NUM_RULES 61
+#define NUM_RULES 60
 #define MAX_DIMENSIONS 10
 
 static char *NONTERMINALS[NUM_NON_TERMINALS] = {
