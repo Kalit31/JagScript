@@ -569,12 +569,9 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operatio
                             {
                                 for (int i = 0; i <
                                                 node1->expression.jaggedType.r1High -
-                                                    node1->expression.jaggedType.r1Low +
-                                                    1;
-                                     i++)
-                                {
-                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++)
-                                    {
+                                                node1->expression.jaggedType.r1Low +
+                                                1; j++) {
+                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; j++) {
                                         // Array dimensions incompatible
                                         if (node1->expression.jaggedType.type.threed_array.size[i][j] !=
                                             node2->expression.jaggedType.type.threed_array.size[i][j])
@@ -1348,7 +1345,7 @@ void traverseParseTree(TreeNode *root)
         }
         else if (tEntry->type == JAGGED_ARRAY && tEntry->typeExpr.jaggedType.is2D)
         {
-            if (child->next == NULL || child->next->child->next == NULL)
+            if (child->next == NULL || child->next->child->next != NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
                 if (root->tok == NULL)
@@ -1390,7 +1387,7 @@ void traverseParseTree(TreeNode *root)
         }
         else if (tEntry->type == JAGGED_ARRAY && !tEntry->typeExpr.jaggedType.is2D)
         {
-            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next == NULL)
+            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next != NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
                 if (root->tok == NULL)
