@@ -1,3 +1,9 @@
+/* Group 3
+Ashrya Agrawal          2018A7PS0210P
+Kalit Naresh Inani      2018A7PS0207P
+Prajwal Gupta           2018A7PS0231P */
+
+
 Types: integer, real, bool, array-> rectangular, jagged
 Variable Name: alphabet, digits, underscore. Not start with digit
 Keywords: program: PROGRAM, declare: DECLARE, list: LIST, of: OF , variables: VARIABLES, array: ARRAY, size: SIZE, values: VALUES, jagged array: JAGARR, of: OF, integer: INTEGER, real: REAL, boolean: BOOLEAN
