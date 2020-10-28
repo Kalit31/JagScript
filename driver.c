@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "ReadGrammar.c"
-#include "tokenizer.c"
-#include "parsetree.c"
-#include "printParseTree.c"
-#include "printTypeExpressionTable.c"
+#include "readGrammar.h"
+#include "tokenizer.h"
+#include "parsetree.h"
+#include "print.h"
 
 int main()
 {
@@ -16,7 +15,7 @@ int main()
     printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
     Token *ts = NULL;
-    fileName = "testcases/t6.txt";
+    fileName = "testcases/t5.txt";
     ts = tokeniseSourcecode(fileName, ts);
     printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 
@@ -87,7 +86,6 @@ int main()
                 traverseParseTree(t);
                 printf("\n-------------------------------------------------TRAVERSING PARSE TREE COMPLETED---------------------------------------------");
                 printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
-
                 printTypeExpressionTable(table, currentTableEntry);
             }
             break;

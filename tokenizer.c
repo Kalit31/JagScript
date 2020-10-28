@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "token.h"
-
-TokenName findCorrectToken(char *token);
+#include "tokenizer.h"
 
 Token *tokeniseSourcecode(char *fileName, Token *s)
 {

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "node.h"
 #define ARROW "=>"
+#include "readGrammar.h"
 
 // This function populates the llist by reading the grammer text file
 void readGrammar(char *fileName, Node *llist)

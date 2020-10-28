@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "parsetree.h"
 #include "typeExpression.h"
-#include "naryTree.c"
-#include "stack.c"
+#include "naryTree.h"
+#include "stack.h"
+#include "print.h"
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -11,10 +13,6 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN "\x1b[36m"
 #define ANSI_COLOR_RESET "\x1b[0m"
-
-static int currentTableEntry = 0;
-static int TYPETABLESIZE = 0;
-static TypeExprEntry *table;
 
 int findTerminal(char *s)
 {
@@ -515,59 +513,80 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operatio
             {
                 // There was some issue with declaration earlier
                 printTypeCheckError(node1, node2, operation, "Type definition carries error");
-            } else {
-                if (node1->expression.jaggedType.is2D != node2->expression.jaggedType.is2D) {
+            }
+            else
+            {
+                if (node1->expression.jaggedType.is2D != node2->expression.jaggedType.is2D)
+                {
                     // Raise error... Array types not compatible
                     printTypeCheckError(node1, node2, operation, "Arrays are incompatible");
                 }
-                else {
+                else
+                {
                     if (node1->expression.jaggedType.r1Low != node2->expression.jaggedType.r1Low ||
-                        node1->expression.jaggedType.r1High != node2->expression.jaggedType.r1High) {
+                        node1->expression.jaggedType.r1High != node2->expression.jaggedType.r1High)
+                    {
                         // Incompatible dimensions
                         printTypeCheckError(node1, node2, operation, "JA size mismatch");
                     }
-                    else {
-                        if (node1->expression.jaggedType.is2D) {
+                    else
+                    {
+                        if (node1->expression.jaggedType.is2D)
+                        {
                             // 2D Jagged Array
                             for (int i = 0;
                                  i <
-                                 node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++) {
+                                 node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1;
+                                 i++)
+                            {
                                 if (node1->expression.jaggedType.type.twod_array.size[i] !=
-                                    node2->expression.jaggedType.type.twod_array.size[i]) {
+                                    node2->expression.jaggedType.type.twod_array.size[i])
+                                {
                                     // Array dimensions incompatible
                                     printTypeCheckError(node1, node2, operation, "2D JA size mismatch");
                                 }
                             }
                         }
-                        else {
+                        else
+                        {
                             // 3D Jagged Array
                             // Check compatibility for 2nd dimension
                             int incomaptibilityFlag2ndDim = 0;
                             for (int i = 0;
                                  i <
-                                 node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++) {
+                                 node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1;
+                                 i++)
+                            {
                                 if (node1->expression.jaggedType.type.threed_array.sizeR2[i] !=
-                                    node2->expression.jaggedType.type.threed_array.sizeR2[i]) {
+                                    node2->expression.jaggedType.type.threed_array.sizeR2[i])
+                                {
                                     // Array dimensions incompatible
                                     incomaptibilityFlag2ndDim = 1;
                                 }
                             }
                             // check compatibility for 3rd dimension
-                            if (!incomaptibilityFlag2ndDim) {
+                            if (!incomaptibilityFlag2ndDim)
+                            {
                                 for (int i = 0; i <
                                                 node1->expression.jaggedType.r1High -
-                                                node1->expression.jaggedType.r1Low +
-                                                1; i++) {
-                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++) {
+                                                    node1->expression.jaggedType.r1Low +
+                                                    1;
+                                     i++)
+                                {
+                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++)
+                                    {
                                         // Array dimensions incompatible
                                         if (node1->expression.jaggedType.type.threed_array.size[i][j] !=
-                                            node2->expression.jaggedType.type.threed_array.size[i][j]) {
+                                            node2->expression.jaggedType.type.threed_array.size[i][j])
+                                        {
                                             // Array dimensions incompatible
                                             printTypeCheckError(node1, node2, operation, "3D JA size mismatch");
                                         }
                                     }
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 // Mismatch in second dimension of 3D Jagged Array
                                 printTypeCheckError(node1, node2, operation, "3D JA size mismatch");
                             }
@@ -1430,4 +1449,17 @@ void traverseParseTree(TreeNode *root)
         printf("You shouldn't be here\n");
     }
     }
+}
+
+void printTypeExpressionTable()
+{
+    printf("CURR ENTRIES: %d\n", currentTableEntry);
+    printf("Field1\t\t\tField2\t\tField3\t\t\tField4\n\n");
+    for (int i = 0; i < currentTableEntry; i++)
+    {
+        printf("%-10s%20s\t\t%-20s\t", table[i].name, printType(table[i].type), printArrayType(table[i].rectArrayType));
+        printTypeExpression(table[i].type, table[i].typeExpr);
+        printf("\n");
+    }
+    printf("\n-----------------------------------------------PRINTING TYPE EXPRESSION TABLE COMPLETED---------------------------------------\n\n");
 }
