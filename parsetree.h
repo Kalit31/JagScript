@@ -17,5 +17,6 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g);
 void traverseParseTree(TreeNode *t);
 void printTypeExpressionTable();
 void shouldPrintErrorsOrNot(int n);
+void initializeTable();
 
 #endif

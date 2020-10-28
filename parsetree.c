@@ -300,6 +300,17 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     return root;
 }
 
+void initializeTable()
+{
+    if (table != NULL)
+    {
+        free(table);
+    }
+    table = NULL;
+    currentTableEntry = 0;
+    TYPETABLESIZE = 0;
+}
+
 void shouldPrintErrorsOrNot(int n)
 {
     shouldPrintErrors = n;

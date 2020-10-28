@@ -62,9 +62,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                table = NULL;
-                currentTableEntry = 0;
-                TYPETABLESIZE = 0;
+                initializeTable();
                 shouldPrintErrorsOrNot(1);
                 printf("LineNo.\t\tStatement Type\t\tOperator\tLexeme1\t\t\tType1\t\tLexeme2\t\t\tType2\t\tDepth\t\tMessage\n\n");
                 traverseParseTree(t);
@@ -84,9 +82,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                table = NULL;
-                currentTableEntry = 0;
-                TYPETABLESIZE = 0;
+                initializeTable();
                 shouldPrintErrorsOrNot(0);
                 traverseParseTree(t);
                 printParseTree(t);
@@ -104,9 +100,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                table = NULL;
-                currentTableEntry = 0;
-                TYPETABLESIZE = 0;
+                initializeTable();
                 shouldPrintErrorsOrNot(0);
                 traverseParseTree(t);
                 printTypeExpressionTable(table, currentTableEntry);
