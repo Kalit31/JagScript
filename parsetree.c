@@ -281,9 +281,13 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     TreeNode *root = initialiseParseTree();
     push(st, root);
     globalTokenPtr = s;
-    build(root, st, g, 1);
+    int success = build(root, st, g, 1);
     //root = buildNew(root, g);
-    printf("\n------------------------------------------------PARSE TREE IS CREATED SUCCESSFULLY--------------------------------------------\n\n");
+    if(success)
+        printf("\n------------------------------------------------PARSE TREE IS CREATED SUCCESSFULLY--------------------------------------------\n\n");
+    else {
+        printf("\n--------------------------------------------Syntax Error : Failed to Create Parse Tree----------------------------------------\n\n");
+    }
 
     return root;
 }
