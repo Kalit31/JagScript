@@ -3,6 +3,6 @@
 
 TreeNode *createParseTree(TreeNode *t, Token *s, Node *g);
 
-void traverseParseTree(TreeNode *t, TypeExprEntry *table);
+void traverseParseTree(TreeNode *t);
 
 void printParseTree(TreeNode *t);

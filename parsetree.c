@@ -14,6 +14,7 @@
 
 static int currentTableEntry = 0;
 static int TYPETABLESIZE = 0;
+static TypeExprEntry *table;
 
 int findTerminal(char *s)
 {
@@ -365,7 +366,7 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * mes
     ,typeName1, b->tok->lexeme,typeName2,b->depth,message);
 }
 
-void checkArrayVariableIsInteger(TypeExprEntry *table, Token *tok)
+void checkArrayVariableIsInteger(Token *tok)
 {
     char *varName = tok->lexeme;
     int i = 0;
@@ -401,7 +402,7 @@ int convertStringToInteger(char *s)
     return result;
 }
 
-TypeExprEntry *populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
+void populateTypeExpressionTable(TreeNode *root)
 {
     if (TYPETABLESIZE == 0)
     {
@@ -449,11 +450,9 @@ TypeExprEntry *populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
     table[currentTableEntry].typeExpr = parent->expression;
 
     currentTableEntry++;
-
-    return table;
 }
 
-void populateNodeWithTypeExpression(TreeNode *node, TypeExprEntry *table, TreeNode *term)
+void populateNodeWithTypeExpression(TreeNode *node, TreeNode *term)
 {
     if (term->terminal == NUM)
     {
@@ -583,7 +582,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operatio
     }
 }
 
-void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operation, TypeExprEntry *table)
+void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operation)
 {
     Terminal op = operation->terminal;
 
@@ -688,11 +687,11 @@ void performTypeChecking(TreeNode *root, TreeNode *rightExpr, TreeNode *operatio
     }
 }
 
-void traverseParseTree(TreeNode *root, TypeExprEntry *table)
+void traverseParseTree(TreeNode *root)
 {
     if (root->isLeaf == 1 && root->terminal == ID)
     {
-        table = populateTypeExpressionTable(table, root);
+        populateTypeExpressionTable(root);
         return;
     }
     while (root->isLeaf == 1 && root->next != NULL)
@@ -710,7 +709,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     case s:
     {
         // curr node is 's' : Start Symbol
-        traverseParseTree(root->child, table);
+        traverseParseTree(root->child);
         break;
     }
     case list_of_statements:
@@ -718,10 +717,10 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         // curr node is list of statements
         TreeNode *declStmts = root->child;
         //Traverse Declaration Subtree
-        traverseParseTree(declStmts, table);
+        traverseParseTree(declStmts);
         //Traverse Assignment Subtree
         TreeNode *assgnStmts = declStmts->next;
-        traverseParseTree(assgnStmts, table);
+        traverseParseTree(assgnStmts);
         break;
     }
     case declaration_statements:
@@ -730,11 +729,11 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         TreeNode *singleDeclaration = root->child;
 
         //Traverse single declaration statement
-        traverseParseTree(singleDeclaration, table);
+        traverseParseTree(singleDeclaration);
 
         if (singleDeclaration->next != NULL)
         {
-            traverseParseTree(singleDeclaration->next, table);
+            traverseParseTree(singleDeclaration->next);
         }
         break;
     }
@@ -742,7 +741,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // curr node is a single declaration statement;
         TreeNode *typeOfDecl = root->child;
-        traverseParseTree(typeOfDecl, table);
+        traverseParseTree(typeOfDecl);
         break;
     }
     case primitive_decl:
@@ -784,7 +783,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         root->typeInformationStored = 1;
         root->expression.primitiveType = primType;
         // Traverse declare_vars node
-        traverseParseTree(declareVarsNode, table);
+        traverseParseTree(declareVarsNode);
         break;
     }
     case rect_array_decl:
@@ -822,7 +821,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                         if (term->terminal == 29)
                         {
                             // idx is a ID
-                            checkArrayVariableIsInteger(table, term->tok);
+                            checkArrayVariableIsInteger(term->tok);
                             rectArr.dimenArray[rectArr.currDimensions][0] = -1;
                             rectArr.dynamicDimenArray[rectArr.currDimensions][0] = term->tok->lexeme;
                         }
@@ -842,7 +841,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                         if (term->terminal == 29)
                         {
                             // idx is a ID
-                            checkArrayVariableIsInteger(table, term->tok);
+                            checkArrayVariableIsInteger(term->tok);
                             rectArr.dimenArray[rectArr.currDimensions][1] = -1;
                             rectArr.dynamicDimenArray[rectArr.currDimensions][1] = term->tok->lexeme;
                         }
@@ -873,7 +872,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         rectArr.currDimensions++;
         root->expression.rectType = rectArr;
-        traverseParseTree(declareVarsNode, table);
+        traverseParseTree(declareVarsNode);
         break;
     }
     case jagged_array_decl:
@@ -882,15 +881,15 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         root->type = JAGGED_ARRAY;
         TreeNode *declareVarsNode = nthChild(root, 1);
         TreeNode *declareJagged = nthChild(root, 3);
-        traverseParseTree(declareJagged, table);
+        traverseParseTree(declareJagged);
         root->expression = nthChild(root, 3)->expression;
-        traverseParseTree(declareVarsNode, table);
+        traverseParseTree(declareVarsNode);
         break;
     }
     case declare_jagged:
     {
         TreeNode *child = root->child;
-        traverseParseTree(child, table);
+        traverseParseTree(child);
         root->expression = nthChild(root, 0)->expression;
         break;
     }
@@ -907,7 +906,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
 
         jaggedArray.type.twod_array.size = malloc(sizeof(int) * (jaggedArray.r1High - jaggedArray.r1Low + 1));
         root->expression.jaggedType = jaggedArray;
-        traverseParseTree(nthChild(root, 12), table);
+        traverseParseTree(nthChild(root, 12));
         root->expression = nthChild(root, 12)->expression;
         break;
     }
@@ -995,7 +994,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         jaggedArray.type.threed_array.sizeR2 = malloc(sizeof(int) * (jaggedArray.r1High - jaggedArray.r1Low + 1));
         jaggedArray.type.threed_array.size = malloc(sizeof(int *) * (jaggedArray.r1High - jaggedArray.r1Low + 1));
         root->expression.jaggedType = jaggedArray;
-        traverseParseTree(nthChild(root, 14), table);
+        traverseParseTree(nthChild(root, 14));
         root->expression = nthChild(root, 14)->expression;
         break;
     }
@@ -1093,13 +1092,13 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         if (child->next == NULL)
         {
             // single variable(ID)
-            traverseParseTree(child, table);
+            traverseParseTree(child);
         }
         else
         {
             // LIST OF VARIABLES var_name_list
             // list of variables
-            traverseParseTree(child, table);
+            traverseParseTree(child);
         }
         break;
     }
@@ -1112,13 +1111,13 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         root->expression = parent->expression;
 
         TreeNode *child = root->child;
-        traverseParseTree(child, table);
+        traverseParseTree(child);
 
         if (child->next != NULL)
         {
             // next node is var_name_list
             TreeNode *varNameListNode = child->next;
-            traverseParseTree(varNameListNode, table);
+            traverseParseTree(varNameListNode);
         }
         break;
     }
@@ -1128,11 +1127,11 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         TreeNode *singleAssignment = root->child;
 
         //Traverse single assignment statement
-        traverseParseTree(singleAssignment, table);
+        traverseParseTree(singleAssignment);
 
         if (singleAssignment->next != NULL)
         {
-            traverseParseTree(singleAssignment->next, table);
+            traverseParseTree(singleAssignment->next);
         }
         break;
     }
@@ -1141,13 +1140,13 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         // curr node is assignment
         TreeNode *lhsNode = root->child;
         //Traverse LHS
-        traverseParseTree(lhsNode, table);
+        traverseParseTree(lhsNode);
 
         TreeNode *operation = lhsNode->next;
         TreeNode *rhsNode = operation->next;
         //Traverse RHS
-        traverseParseTree(rhsNode, table);
-        performTypeChecking(lhsNode, rhsNode, operation, table);
+        traverseParseTree(rhsNode);
+        performTypeChecking(lhsNode, rhsNode, operation);
         break;
     }
     case lhs:
@@ -1178,7 +1177,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             root->typeInformationStored = 1;
             root->type = PRIMITIVE;
             root->expression.primitiveType = PRIM_INTEGER;
-            traverseParseTree(child, table);
+            traverseParseTree(child);
         }
         break;
     }
@@ -1187,7 +1186,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         // curr node is rhs
         // child is arithmetic expression or boolean expression
         TreeNode *child = root->child;
-        traverseParseTree(child, table);
+        traverseParseTree(child);
         populateNodeFromNode(root, child);
         break;
     }
@@ -1195,7 +1194,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
     {
         // curr node is arithmetic expression
         TreeNode *arithmeticTerm = root->child;
-        traverseParseTree(arithmeticTerm, table);
+        traverseParseTree(arithmeticTerm);
         populateNodeFromNode(root, arithmeticTerm);
 
         if (arithmeticTerm->next == NULL)
@@ -1206,10 +1205,10 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             // op1 would be either PLUS or MINUS or OR node
             TreeNode *op1 = arithmeticTerm->next;
             TreeNode *arithExpr = op1->next;
-            traverseParseTree(arithExpr, table);
+            traverseParseTree(arithExpr);
 
             // do type checking for arithTerm and arithExpr
-            performTypeChecking(root, arithExpr, op1->child, table);
+            performTypeChecking(root, arithExpr, op1->child);
         }
         break;
     }
@@ -1218,7 +1217,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         // parent is arith_expr or arith_term
         TreeNode *parent = root->parent;
         TreeNode *idexpr = root->child;
-        traverseParseTree(idexpr, table);
+        traverseParseTree(idexpr);
 
         if (idexpr->next == NULL)
         {
@@ -1233,9 +1232,9 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             //op2 would be either MULT or DIV node
             TreeNode *op2 = idexpr->next;
             TreeNode *arithTerm = op2->next;
-            traverseParseTree(arithTerm, table);
+            traverseParseTree(arithTerm);
             //do type checking for idx and arithTerm;
-            performTypeChecking(root, arithTerm, op2->child, table);
+            performTypeChecking(root, arithTerm, op2->child);
             populateNodeFromNode(parent, root);
         }
         break;
@@ -1246,14 +1245,14 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         if (child->isLeaf)
         {
             // ID Node or NUM Node
-            populateNodeWithTypeExpression(root, table, child);
+            populateNodeWithTypeExpression(root, child);
             populateNodeFromNode(root->parent, root);
         }
         else
         {
             // Array Element
             // Check whether we are correctly accessing the array
-            traverseParseTree(child, table);
+            traverseParseTree(child);
             populateNodeFromNode(root->parent, root); //root->parent->tok = root->tok;
         }
         break;
@@ -1289,7 +1288,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 i--;
                 if (child->child->terminal == ID)
                 {
-                    checkArrayVariableIsInteger(tEntry, root->tok);
+                    checkArrayVariableIsInteger(root->tok);
                     //Raise error as per pg 11
                     if (root->tok == NULL)
                         printArrayError("**", 2, "Array is dynamic", -1);
@@ -1337,7 +1336,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             if (child->child->terminal == ID || child->next->child->child->terminal == ID)
             {
-                checkArrayVariableIsInteger(tEntry, root->tok);
+                checkArrayVariableIsInteger(root->tok);
                 // Error
                 if (root->tok == NULL)
                     printArrayError("**", 2, "Array access error", -1);
@@ -1379,7 +1378,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             if (child->child->terminal == ID || child->next->child->child->terminal == ID)
             {
-                checkArrayVariableIsInteger(tEntry, root->tok);
+                checkArrayVariableIsInteger(root->tok);
                 // Error
                 if (root->tok == NULL)
                     printArrayError("**", 2, "Array access error", -1);
