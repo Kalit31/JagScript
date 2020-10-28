@@ -515,58 +515,61 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operatio
             {
                 // There was some issue with declaration earlier
                 printTypeCheckError(node1, node2, operation, "Type definition carries error");
-            }
-            if (node1->expression.jaggedType.is2D != node2->expression.jaggedType.is2D)
-            {
-                // Raise error... Array types not compatible
-                printTypeCheckError(node1, node2, operation, "Arrays are incompatible");
-            }
-            else
-            {
-                if (node1->expression.jaggedType.r1Low != node2->expression.jaggedType.r1Low ||
-                    node1->expression.jaggedType.r1High != node2->expression.jaggedType.r1High)
-                {
-                    // Incompatible dimensions
-                    printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
+            } else {
+                if (node1->expression.jaggedType.is2D != node2->expression.jaggedType.is2D) {
+                    // Raise error... Array types not compatible
+                    printTypeCheckError(node1, node2, operation, "Arrays are incompatible");
                 }
-                if (node1->expression.jaggedType.is2D)
-                {
-                    // 2D Jagged Array
-                    for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++)
-                    {
-                        if (node1->expression.jaggedType.type.twod_array.size[i] != node2->expression.jaggedType.type.twod_array.size[i])
-                        {
-                            // Array dimensions incompatible
-                            printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
-                        }
+                else {
+                    if (node1->expression.jaggedType.r1Low != node2->expression.jaggedType.r1Low ||
+                        node1->expression.jaggedType.r1High != node2->expression.jaggedType.r1High) {
+                        // Incompatible dimensions
+                        printTypeCheckError(node1, node2, operation, "JA size mismatch");
                     }
-                }
-                else
-                {
-                    // 3D Jagged Array
-                    // Check compatibility for 2nd dimension
-                    int incomaptibilityFlag2ndDim = 0;
-                    for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++)
-                    {
-                        if (node1->expression.jaggedType.type.threed_array.sizeR2[i] != node2->expression.jaggedType.type.threed_array.sizeR2[i])
-                        {
-                            // Array dimensions incompatible
-                            incomaptibilityFlag2ndDim = 1;
-                        }
-                    }
-                    // check compatibility for 3rd dimension
-                    if (!incomaptibilityFlag2ndDim)
-                    {
-                        for (int i = 0; i < node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++)
-                        {
-                            for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++)
-                            {
-                                // Array dimensions incompatible
-                                if (node1->expression.jaggedType.type.threed_array.size[i][j] != node2->expression.jaggedType.type.threed_array.size[i][j])
-                                {
+                    else {
+                        if (node1->expression.jaggedType.is2D) {
+                            // 2D Jagged Array
+                            for (int i = 0;
+                                 i <
+                                 node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++) {
+                                if (node1->expression.jaggedType.type.twod_array.size[i] !=
+                                    node2->expression.jaggedType.type.twod_array.size[i]) {
                                     // Array dimensions incompatible
-                                    printTypeCheckError(node1, node2, operation, "Array dimensions do not match");
+                                    printTypeCheckError(node1, node2, operation, "2D JA size mismatch");
                                 }
+                            }
+                        }
+                        else {
+                            // 3D Jagged Array
+                            // Check compatibility for 2nd dimension
+                            int incomaptibilityFlag2ndDim = 0;
+                            for (int i = 0;
+                                 i <
+                                 node1->expression.jaggedType.r1High - node1->expression.jaggedType.r1Low + 1; i++) {
+                                if (node1->expression.jaggedType.type.threed_array.sizeR2[i] !=
+                                    node2->expression.jaggedType.type.threed_array.sizeR2[i]) {
+                                    // Array dimensions incompatible
+                                    incomaptibilityFlag2ndDim = 1;
+                                }
+                            }
+                            // check compatibility for 3rd dimension
+                            if (!incomaptibilityFlag2ndDim) {
+                                for (int i = 0; i <
+                                                node1->expression.jaggedType.r1High -
+                                                node1->expression.jaggedType.r1Low +
+                                                1; i++) {
+                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++) {
+                                        // Array dimensions incompatible
+                                        if (node1->expression.jaggedType.type.threed_array.size[i][j] !=
+                                            node2->expression.jaggedType.type.threed_array.size[i][j]) {
+                                            // Array dimensions incompatible
+                                            printTypeCheckError(node1, node2, operation, "3D JA size mismatch");
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Mismatch in second dimension of 3D Jagged Array
+                                printTypeCheckError(node1, node2, operation, "3D JA size mismatch");
                             }
                         }
                     }
