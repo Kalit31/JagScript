@@ -3,7 +3,6 @@ Ashrya Agrawal          2018A7PS0210P
 Kalit Naresh Inani      2018A7PS0207P
 Prajwal Gupta           2018A7PS0231P */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +18,8 @@ Prajwal Gupta           2018A7PS0231P */
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN "\x1b[36m"
 #define ANSI_COLOR_RESET "\x1b[0m"
+
+int shouldPrintErrors = 0;
 
 int findTerminal(char *s)
 {
@@ -299,8 +300,17 @@ TreeNode *createParseTree(TreeNode *t, Token *s, Node *g)
     return root;
 }
 
+void shouldPrintErrorsOrNot(int n)
+{
+    shouldPrintErrors = n;
+}
+
 void printArrayError(char *name, int type, char *message, int lineno)
 {
+    if (shouldPrintErrors == 0)
+    {
+        return;
+    }
     char *typeName;
     switch (type)
     {
@@ -328,13 +338,35 @@ void printArrayError(char *name, int type, char *message, int lineno)
 
 void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * message)
 {
+    if (shouldPrintErrors == 0)
+    {
+        return;
+    }
     char *typeName1;
     char *typeName2;
     switch (a->type)
     {
     case 0:
     {
-        typeName1 = "PRIMITIVE";
+        PrimType type = a->expression.primitiveType;
+        switch (type)
+        {
+        case PRIM_INTEGER:
+        {
+            typeName1 = "INTEGER";
+            break;
+        }
+        case PRIM_REAL:
+        {
+            typeName1 = "REAL";
+            break;
+        }
+        case PRIM_BOOLEAN:
+        {
+            typeName1 = "BOOLEAN";
+            break;
+        }
+        }
         break;
     }
     case 1:
@@ -344,7 +376,14 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * mes
     }
     case 2:
     {
-        typeName1 = "JAGGED ARRAY";
+        if (a->expression.jaggedType.is2D)
+        {
+            typeName1 = "2D JAGGED";
+        }
+        else
+        {
+            typeName1 = "3D JAGGED";
+        }
         break;
     }
     }
@@ -352,7 +391,25 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * mes
     {
     case 0:
     {
-        typeName2 = "PRIMITIVE";
+        PrimType type = b->expression.primitiveType;
+        switch (type)
+        {
+        case PRIM_INTEGER:
+        {
+            typeName2 = "INTEGER";
+            break;
+        }
+        case PRIM_REAL:
+        {
+            typeName2 = "REAL";
+            break;
+        }
+        case PRIM_BOOLEAN:
+        {
+            typeName2 = "BOOLEAN";
+            break;
+        }
+        }
         break;
     }
     case 1:
@@ -362,7 +419,14 @@ void printTypeCheckError(TreeNode *a, TreeNode *b, Terminal operator, char * mes
     }
     case 2:
     {
-        typeName2 = "JAGGED ARRAY";
+        if (b->expression.jaggedType.is2D)
+        {
+            typeName2 = "2D JAGGED";
+        }
+        else
+        {
+            typeName2 = "3D JAGGED";
+        }
         break;
     }
     }
@@ -575,9 +639,12 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operatio
                             {
                                 for (int i = 0; i <
                                                 node1->expression.jaggedType.r1High -
-                                                node1->expression.jaggedType.r1Low +
-                                                1; i++) {
-                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; j++) {
+                                                    node1->expression.jaggedType.r1Low +
+                                                    1;
+                                     i++)
+                                {
+                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++)
+                                    {
                                         // Array dimensions incompatible
                                         if (node1->expression.jaggedType.type.threed_array.size[i][j] !=
                                             node2->expression.jaggedType.type.threed_array.size[i][j])
@@ -1351,7 +1418,7 @@ void traverseParseTree(TreeNode *root)
         }
         else if (tEntry->type == JAGGED_ARRAY && tEntry->typeExpr.jaggedType.is2D)
         {
-            if (child->next == NULL || child->next->child->next != NULL)
+            if (child->next == NULL || child->next->child->next == NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
                 if (root->tok == NULL)
@@ -1393,7 +1460,7 @@ void traverseParseTree(TreeNode *root)
         }
         else if (tEntry->type == JAGGED_ARRAY && !tEntry->typeExpr.jaggedType.is2D)
         {
-            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next != NULL)
+            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next == NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
                 if (root->tok == NULL)
@@ -1456,7 +1523,6 @@ void traverseParseTree(TreeNode *root)
 
 void printTypeExpressionTable()
 {
-    printf("CURR ENTRIES: %d\n", currentTableEntry);
     printf("Field1\t\t\tField2\t\tField3\t\t\tField4\n\n");
     for (int i = 0; i < currentTableEntry; i++)
     {

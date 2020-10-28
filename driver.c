@@ -11,10 +11,12 @@ Prajwal Gupta           2018A7PS0231P */
 #include "parsetree.h"
 #include "print.h"
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
-    if(argc>2) printf("Recieved more command line arguments than expected.\n\n");
-    else if(argc==1) printf("You have not passed any Source Code File\n\n");
+    if (argc > 2)
+        printf("Recieved more command line arguments than expected.\n\n");
+    else if (argc == 1)
+        printf("You have not passed any Source Code File\n\n");
 
     clock_t begin = clock();
     Node *arr = (Node *)malloc(sizeof(Node) * NUM_RULES);
@@ -25,6 +27,7 @@ int main(int argc, char * argv[])
     Token *ts = NULL;
 
     char *fileName = argv[1];
+
     ts = tokeniseSourcecode(fileName, ts);
     printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 
@@ -53,13 +56,21 @@ int main(int argc, char * argv[])
         {
             TreeNode *t = NULL;
             t = createParseTree(t, ts, arr);
-            table = NULL;
-            currentTableEntry = 0;
-            TYPETABLESIZE = 0;
-            printf("LineNo.\t\tStatement Type\t\tOperator\tLexeme1\t\t\tType1\t\tLexeme2\t\t\tType2\t\tDepth\t\tMessage\n\n");
-            traverseParseTree(t);
-            printf("\n-------------------------------------------------TRAVERSING PARSE TREE COMPLETED---------------------------------------------");
-            printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
+            if (t == NULL)
+            {
+                printf("There is some syntax error in the program\n");
+            }
+            else
+            {
+                table = NULL;
+                currentTableEntry = 0;
+                TYPETABLESIZE = 0;
+                shouldPrintErrorsOrNot(1);
+                printf("LineNo.\t\tStatement Type\t\tOperator\tLexeme1\t\t\tType1\t\tLexeme2\t\t\tType2\t\tDepth\t\tMessage\n\n");
+                traverseParseTree(t);
+                printf("\n-------------------------------------------------TRAVERSING PARSE TREE COMPLETED---------------------------------------------");
+                printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
+            }
             break;
         }
         case 3:
@@ -73,6 +84,11 @@ int main(int argc, char * argv[])
             }
             else
             {
+                table = NULL;
+                currentTableEntry = 0;
+                TYPETABLESIZE = 0;
+                shouldPrintErrorsOrNot(0);
+                traverseParseTree(t);
                 printParseTree(t);
             }
             break;
@@ -91,10 +107,8 @@ int main(int argc, char * argv[])
                 table = NULL;
                 currentTableEntry = 0;
                 TYPETABLESIZE = 0;
-                printf("LineNo.\t\tStatement Type\t\tOperator\tLexeme1\t\t\tType1\t\tLexeme2\t\t\tType2\t\t\tMessage\n\n");
+                shouldPrintErrorsOrNot(0);
                 traverseParseTree(t);
-                printf("\n-------------------------------------------------TRAVERSING PARSE TREE COMPLETED---------------------------------------------");
-                printf("\n----------------------------------------------------PRINTING TYPE ERRORS COMPLETED--------------------------------------------\n\n");
                 printTypeExpressionTable(table, currentTableEntry);
             }
             break;
