@@ -12,7 +12,7 @@ void readGrammar(char *fileName, Node *llist)
     // Exit if file could not be opened
     if (fp == NULL)
     {
-        printf("Could not read grammer.txt\n");
+        printf("Could not read %s\n", fileName);
         exit(0);
     }
 

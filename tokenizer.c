@@ -11,7 +11,7 @@ Token *tokeniseSourcecode(char *fileName, Token *s)
     // Exit if file could not be opened
     if (fp == NULL)
     {
-        printf("Could not read source code.txt\n");
+        printf("Could not read source code file %s\n", fileName);
         exit(0);
     }
 
@@ -64,8 +64,8 @@ Token *tokeniseSourcecode(char *fileName, Token *s)
         }
         line++;
     }
-    return s;
     fclose(fp);
+    return s;
 }
 
 //check if the token is an integer

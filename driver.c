@@ -6,16 +6,20 @@
 #include "parsetree.h"
 #include "print.h"
 
-int main()
+int main(int argc, char * argv[])
 {
+    if(argc>2) printf("Recieved more command line arguments than expected.\n\n");
+    else if(argc==1) printf("You have not passed any Source Code File\n\n");
+
     clock_t begin = clock();
     Node *arr = (Node *)malloc(sizeof(Node) * NUM_RULES);
-    char *fileName = "grammar.txt";
-    readGrammar(fileName, arr);
+    char *grammarFile = "grammar.txt";
+    readGrammar(grammarFile, arr);
     printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
     Token *ts = NULL;
-    fileName = "testcases/t5.txt";
+
+    char *fileName = argv[1];
     ts = tokeniseSourcecode(fileName, ts);
     printf("\n-------------------------------------------------TOKENISING SOURCE CODE COMPLETED---------------------------------------------\n\n");
 
