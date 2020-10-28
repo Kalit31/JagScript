@@ -13,6 +13,7 @@
 #define ANSI_COLOR_RESET "\x1b[0m"
 
 static int currentTableEntry = 0;
+static int TYPETABLESIZE = 0;
 
 int findTerminal(char *s)
 {
@@ -400,10 +401,23 @@ int convertStringToInteger(char *s)
     return result;
 }
 
-void populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
+TypeExprEntry *populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
 {
+    if (TYPETABLESIZE == 0)
+    {
+        table = (TypeExprEntry *)malloc(sizeof(TypeExprEntry) * 1);
+        TYPETABLESIZE = 1;
+    }
+    else if (currentTableEntry == TYPETABLESIZE)
+    {
+        TYPETABLESIZE = TYPETABLESIZE * 2;
+        table = (TypeExprEntry *)realloc(table, sizeof(TypeExprEntry) * TYPETABLESIZE);
+    }
+
     TreeNode *parent = root->parent;
-    table[currentTableEntry].name = root->tok->lexeme;
+    table[currentTableEntry].name = (char *)malloc(sizeof(char) * (strlen(root->tok->lexeme) + 1));
+    strcpy(table[currentTableEntry].name, root->tok->lexeme);
+
     table[currentTableEntry].type = parent->type;
     if (table[currentTableEntry].type == RECTANGULAR_ARRAY)
     {
@@ -431,8 +445,12 @@ void populateTypeExpressionTable(TypeExprEntry *table, TreeNode *root)
     {
         table[currentTableEntry].rectArrayType = NOT_APPLICABLE;
     }
+
     table[currentTableEntry].typeExpr = parent->expression;
+
     currentTableEntry++;
+
+    return table;
 }
 
 void populateNodeWithTypeExpression(TreeNode *node, TypeExprEntry *table, TreeNode *term)
@@ -674,7 +692,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
 {
     if (root->isLeaf == 1 && root->terminal == ID)
     {
-        populateTypeExpressionTable(table, root);
+        table = populateTypeExpressionTable(table, root);
         return;
     }
     while (root->isLeaf == 1 && root->next != NULL)
@@ -849,7 +867,6 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                             break;
                         }
                     }
-                    // traverseParseTree(rectArrChild, table);
                 }
             }
             rectDeclChild = rectDeclChild->next;
@@ -909,7 +926,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         {
             if (x >= r1Len)
             {
-                printArrayError("***", 2, "More rows than expected", root->tok->lineNo);
+                printArrayError("***", 2, "More rows than expected", statement->child->tok->lineNo);
                 jaggArr.isValid = 0;
                 // printf("Recieved More rows than expected in Jagged Array declaration\n");
                 break;
@@ -918,7 +935,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             int index = convertStringToInteger(nthChild(statement, 2)->tok->lexeme);
             if (index != r1Low + x)
             {
-                printArrayError("***", 2, "Incorrect order of rows", root->tok->lineNo);
+                printArrayError("***", 2, "Incorrect order of rows", statement->child->tok->lineNo);
                 jaggArr.isValid = 0;
                 //printf("Incorrect order/index of rows for Jagged Arrays declaration\n");
             }
@@ -933,7 +950,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
                 twod_values->expression = twod_values->parent->expression;
                 if (twod_values->child->child->next->child->terminal != EPS)
                 {
-                    printArrayError("***", 2, "Type Definition Error", root->tok->lineNo);
+                    printArrayError("***", 2, "Type Definition Error", statement->child->tok->lineNo);
                     jaggArr.isValid = 0;
                     //printf("Type Definition Error for 2D Jagged Array\n");
                 }
@@ -945,7 +962,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             }
             if (y != size)
             {
-                printArrayError("***", 2, "Expected values not found", root->tok->lineNo);
+                printArrayError("***", 2, "Expected values not found", statement->child->tok->lineNo);
                 jaggArr.isValid = 0;
                 // printf("Expected %d values in declaration, but got %d values\n", size, y);
             }
@@ -959,7 +976,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         }
         if (x < r1Len)
         {
-            printArrayError("***", 2, "Expected values not found", root->tok->lineNo);
+            printArrayError("***", 2, "Expected values not found", root->child->child->tok->lineNo);
             jaggArr.isValid = 0;
             //printf("Expected %d number of rows in jagged array declaration, but obtained %d rows\n", r1Len, x);
         }
@@ -996,7 +1013,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         {
             if (x >= r1Len)
             {
-                printArrayError("***", 2, "More rows than expected", root->tok->lineNo);
+                printArrayError("***", 2, "More rows than expected", statement->child->tok->lineNo);
                 jaggArr.isValid = 0;
                 break;
             }
@@ -1005,7 +1022,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             if (index != r1Low + x)
             {
 
-                printArrayError("**", 2, "Incorrect order of rows", root->tok->lineNo);
+                printArrayError("***", 2, "Incorrect order of rows", statement->child->tok->lineNo);
                 jaggArr.isValid = 0;
             }
             int size = convertStringToInteger(nthChild(statement, 6)->tok->lexeme);
@@ -1043,7 +1060,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
             if (y != size)
             {
 
-                printArrayError("***", 2, "Expected values not found", root->tok->lineNo);
+                printArrayError("***", 2, "Expected values not found", statement->child->tok->lineNo);
                 jaggArr.isValid = 0;
                 //printf("Expected %d values in declaration, but got %d values\n", size, y);
             }
@@ -1058,7 +1075,7 @@ void traverseParseTree(TreeNode *root, TypeExprEntry *table)
         if (x < r1Len)
         {
 
-            printArrayError("***", 2, "Expected values not found", root->tok->lineNo);
+            printArrayError("***", 2, "Expected values not found", root->child->child->tok->lineNo);
             jaggArr.isValid = 0;
             //printf("Expected %d number of rows in jagged array declaration, but obtained %d rows\n", r1Len, x);
         }
