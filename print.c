@@ -3,8 +3,6 @@ Ashrya Agrawal          2018A7PS0210P
 Kalit Naresh Inani      2018A7PS0207P
 Prajwal Gupta           2018A7PS0231P */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,6 +70,11 @@ void printTypeExpression(int type, TypeExpression typeExpr)
     case JAGGED_ARRAY:
     {
         JaggedArray jaggArr = typeExpr.jaggedType;
+        if (jaggArr.isValid == 0)
+        {
+            printf("***");
+            break;
+        }
         printf("jaggedArray, dimensions=%d, ", jaggArr.is2D ? 2 : 3);
         printf("range_R1 = (%d,%d), range_R2 = (", jaggArr.r1Low, jaggArr.r1High);
         int r1Len = jaggArr.r1High - jaggArr.r1Low + 1;
