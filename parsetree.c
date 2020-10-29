@@ -1429,7 +1429,7 @@ void traverseParseTree(TreeNode *root)
         }
         else if (tEntry->type == JAGGED_ARRAY && tEntry->typeExpr.jaggedType.is2D)
         {
-            if (child->next == NULL || child->next->child->next == NULL)
+            if (child->next == NULL || child->next->child->next != NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
                 if (root->tok == NULL)
@@ -1471,7 +1471,7 @@ void traverseParseTree(TreeNode *root)
         }
         else if (tEntry->type == JAGGED_ARRAY && !tEntry->typeExpr.jaggedType.is2D)
         {
-            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next == NULL)
+            if (child->next == NULL || child->next->child->next == NULL || child->next->child->next->child->next != NULL)
             {
                 // Error...More dimensions supplied than acceptable by 2d jagged array
                 if (root->tok == NULL)

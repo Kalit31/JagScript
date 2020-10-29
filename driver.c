@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     clock_t begin = clock();
     Node *arr = (Node *)malloc(sizeof(Node) * NUM_RULES);
-    char *grammarFile = "grammar.txt";
+    char *grammarFile = "Grammar.txt";
     readGrammar(grammarFile, arr);
     printf("\n----------------------------------------------------READING GRAMMAR COMPLETED-------------------------------------------------\n\n");
 
