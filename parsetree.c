@@ -654,7 +654,7 @@ void checkArrayCompatibility(TreeNode *node1, TreeNode *node2, Terminal operatio
                                                     1;
                                      i++)
                                 {
-                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; i++)
+                                    for (int j = 0; j < node1->expression.jaggedType.type.threed_array.sizeR2[i]; j++)
                                     {
                                         // Array dimensions incompatible
                                         if (node1->expression.jaggedType.type.threed_array.size[i][j] !=
